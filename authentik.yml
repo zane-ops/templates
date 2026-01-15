@@ -1,0 +1,121 @@
+version: "3.8"
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+  main_domain_1: "{{ generate_domain }}"
+  pg_user: authentik
+  pg_db: authentik
+  PG_USER: ${pg_user}
+  PG_DB: ${pg_db}
+  PG_PASS: "{{ generate_password | 32 }}"
+  AUTHENTIK_SECRET_KEY: "{{ generate_password | 64 }}"
+  AUTHENTIK_IMAGE: ghcr.io/goauthentik/server
+  AUTHENTIK_TAG: 2025.6.3
+services:
+  postgresql:
+    image: docker.io/library/postgres:16-alpine
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - type: volume
+        target: /var/lib/postgresql/data
+        source: database
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_DB: ${PG_DB}
+    expose:
+      - 5432
+  redis:
+    image: docker.io/library/redis:alpine
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli ping | grep PONG
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - type: volume
+        target: /data
+        source: redis
+    expose:
+      - 6379
+  server:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2025.6.3}
+    command: server
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+    volumes:
+      - type: volume
+        target: /media
+        source: media
+      - type: volume
+        target: /templates
+        source: custom-templates
+    depends_on:
+      - postgresql
+      - redis
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.base_path: /
+        zane.http.routes.0.port: 9000
+        zane.http.routes.0.strip_prefix: "false"
+        zane.http.routes.1.domain: ${main_domain_1}
+        zane.http.routes.1.base_path: /
+        zane.http.routes.1.port: 9443
+        zane.http.routes.1.strip_prefix: "false"
+  worker:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2025.6.3}
+    restart: unless-stopped
+    command: worker
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+    user: root
+    volumes:
+      - type: bind
+        target: /var/run/docker.sock
+        source: /var/run/docker.sock
+      - type: volume
+        target: /media
+        source: media
+      - type: volume
+        target: /certs
+        source: certs
+      - type: volume
+        target: /templates
+        source: custom-templates
+    depends_on:
+      - postgresql
+      - redis
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
+  media:
+    driver: local
+  certs:
+    driver: local
+  custom-templates:
+    driver: local

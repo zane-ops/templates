@@ -1,0 +1,49 @@
+x-zane-env:
+  DOMAIN: "{{ generate_domain }}"
+services:
+  caddy:
+    image: caddy:2-alpine
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+      - source: index.html
+        target: /srv/index.html
+    deploy:
+      labels:
+        zane.http.routes.0.port: 80
+        zane.http.routes.0.domain: ${DOMAIN}
+
+configs:
+  caddyfile:
+    content: |
+      :80 {
+        root * /srv
+        file_server
+      }
+  index.html:
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Hello from ZaneOps!</title>
+        <style>
+          body {
+            font-family: system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+          }
+          .container {
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>👋 Hello from ZaneOps!</h1>
+          <p>Your Caddy app is running successfully.</p>
+        </div>
+      </body>
+      </html>
