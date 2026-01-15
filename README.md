@@ -32,6 +32,92 @@ ZaneOps is a platform for deploying and managing containerized applications. The
 | [typesense.yml](typesense.yml)     | Fast, typo-tolerant search engine      | Standalone                    |
 | [valkey.yml](valkey.yml)           | Redis-compatible key-value store       | Standalone                    |
 
+## Quick Start: Creating a Template
+
+### Minimal Template
+
+```yaml
+services:
+  app:
+    image: nginx:latest
+    deploy:
+      labels:
+        zane.http.routes.0.domain: "example.com"
+        zane.http.routes.0.port: "80"
+```
+
+### Template with Variables
+
+```yaml
+x-zane-env:
+  APP_DOMAIN: "{{ generate_domain }}"
+  DB_PASSWORD: "{{ generate_password | 32 }}"
+  DB_HOST: "{{ network_alias | 'postgres' }}"
+
+services:
+  app:
+    image: myapp:latest
+    environment:
+      DATABASE_URL: "postgresql://user:${DB_PASSWORD}@${DB_HOST}:5432/db"
+    depends_on:
+      - postgres
+    deploy:
+      labels:
+        zane.http.routes.0.domain: "${APP_DOMAIN}"
+        zane.http.routes.0.port: "3000"
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+```
+
+### Template Expressions
+
+Define in `x-zane-env`, reference with `${VAR}`:
+
+| Expression | Output |
+|------------|--------|
+| `{{ generate_domain }}` | Auto-generated subdomain |
+| `{{ generate_password \| 32 }}` | 32-char hex password |
+| `{{ generate_username }}` | Random username (e.g., `reddog65`) |
+| `{{ generate_slug }}` | URL-friendly slug (e.g., `happy-tree-91`) |
+| `{{ generate_uuid }}` | UUID v4 |
+| `{{ generate_email }}` | Generated email address |
+| `{{ network_alias \| 'service' }}` | Stable service hostname |
+
+### Routing Labels
+
+```yaml
+deploy:
+  labels:
+    zane.http.routes.0.domain: "example.com"  # Required
+    zane.http.routes.0.port: "8080"           # Required
+    zane.http.routes.0.base_path: "/"         # Optional (default: /)
+    zane.http.routes.0.strip_prefix: "false"  # Optional (default: false)
+```
+
+For multiple routes, increment the index: `routes.0`, `routes.1`, `routes.2`.
+
+### Key Rules
+
+1. **No `ports`** - Use routing labels instead
+2. **Use named volumes** - For persistent data
+3. **Use `network_alias`** - For service-to-service communication
+4. **Password length must be even** - `generate_password | 32` (not 31)
+
+### What ZaneOps Ignores
+
+- `ports` - Use `deploy.labels` for routing
+- `expose` - Not needed
+- `restart` - Use `deploy.restart_policy`
+- `build` - Only pre-built images supported
+
 ## Usage
 
 ### Deploying on ZaneOps
@@ -45,30 +131,49 @@ ZaneOps is a platform for deploying and managing containerized applications. The
    - Create necessary volumes
    - Start all services in the correct order
 
-### Template Structure
+### CLI Deployment (for testing)
 
-Each template follows a consistent structure:
+Use the included `deploy_compose.py` script to deploy templates directly from the command line:
 
-```yaml
-x-zane-env:
-  # ZaneOps will replace these placeholders with actual values
-  main_domain: "{{ generate_domain }}"
-  db_password: "{{ generate_password | 32 }}"
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-services:
-  # Your application and dependencies
+# Deploy a template
+python deploy_compose.py -f n8n.yml -p my-project -e production
 
-volumes:
-  # Persistent data storage
+# With custom stack slug
+python deploy_compose.py -f postgres.yml -p my-project -e production -s my-postgres
+
+# Against a different ZaneOps instance
+python deploy_compose.py -f grafana.yml -p my-project -e production -u https://zaneops.example.com
 ```
 
-### Template Variables
+**Options:**
 
-ZaneOps supports these placeholder variables:
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-f, --file` | Path to compose YAML file | Required |
+| `-p, --project` | Project slug | `compose` |
+| `-e, --env` | Environment slug | `production` |
+| `-s, --slug` | Stack slug | Filename without extension |
+| `-u, --base-url` | ZaneOps API URL | `http://localhost:8000` |
+| `--username` | Login username | `admin` |
+| `--password` | Login password | `password` |
+| `-m, --message` | Deployment commit message | `Deploy from CLI` |
 
-- `{{ generate_domain }}` - Auto-generated subdomain
-- `{{ generate_password | N }}` - Random password (N = length)
-- `{{ generate_email }}` - Auto-generated email address
+The script will create or update the stack and trigger a deployment, then display the generated URLs, configs, and volumes.
+
+## Documentation
+
+For comprehensive documentation on creating and customizing templates, see the **[Compose Template Guide](compose-template-guide.md)**. This guide covers:
+
+- Template expressions and variable generation
+- Service configuration and routing
+- Volumes and Docker configs
+- Network architecture and service communication
+- Advanced patterns and troubleshooting
+- Migrating from Dokploy templates
 
 ## Template Features
 
@@ -103,31 +208,7 @@ To add a new template:
 5. Document any special configuration in comments
 6. Test the deployment on ZaneOps
 
-## Template Conventions
-
-### Naming
-
-- Services: Use descriptive names with app prefix (e.g., `immich-server`, `immich-database`)
-- Volumes: Match service names for clarity
-- Variables: Use SCREAMING_SNAKE_CASE for environment variables
-
-### Dependencies
-
-- Use `depends_on` to define service startup order
-- Include `healthcheck` for all database services
-- Wait for dependencies in application startup scripts when needed
-
-### Routing
-
-Configure HTTP routes using ZaneOps labels:
-
-```yaml
-deploy:
-  labels:
-    zane.http.routes.0.domain: ${main_domain}
-    zane.http.routes.0.base_path: /
-    zane.http.routes.0.port: 3000
-```
+See the [Compose Template Guide](compose-template-guide.md) for detailed instructions and best practices.
 
 ## Support
 
