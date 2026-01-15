@@ -1,5 +1,5 @@
 x-zane-env:
-  main_domain: "{{ generate_domain }}"
+  main_domain: "{{ generate_domain }}" # should be done in an environment with SSL support only
   better_auth_secret: "{{ generate_password | 32 }}"
   clickhouse_password: "{{ generate_password | 32 }}"
   postgres_password: "{{ generate_password | 32 }}"
