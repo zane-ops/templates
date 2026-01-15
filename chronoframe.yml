@@ -30,7 +30,15 @@ services:
       - NUXT_PUBLIC_MAP_PROVIDER=maplibre
       # MapTiler access token for MapLibre, how to get a key: https://cloud.maptiler.com/account/keys/
       - NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN
+      # ChronoFrame comes with built-in light and dark styles that switch automatically.
+      # If you configure a custom style, it will override the default styles.
+      # Example: https://demotiles.maplibre.org/globe.json
+      - NUXT_PUBLIC_MAP_MAPLIBRE_STYLE
+      # To use Mapbox as the map provider, how to get a key:  https://console.mapbox.com/account/access-tokens/
       - NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+      # If you configure a custom style, it will override the default styles.
+      # Example: mapbox://styles/mapbox/streets-v11
+      - NUXT_PUBLIC_MAP_MAPBOX_STYLE
       # Storage provider (local)
       - NUXT_STORAGE_PROVIDER=local
       - NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
