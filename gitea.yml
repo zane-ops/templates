@@ -1,0 +1,43 @@
+x-zane-env:
+  GITEA_DB_PASSWORD: "{{ generate_password | 24 }}"
+  GITEA_DOMAIN: "{{ generate_domain }}"
+
+services:
+  gitea:
+    image: docker.gitea.com/gitea:1.24.4
+    restart: unless-stopped
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=postgres:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=${GITEA_DB_PASSWORD:-gitea}
+    volumes:
+      - gitea-data:/data
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    deploy:
+      labels:
+        zane.http.routes.0.port: 3000
+        zane.http.routes.0.domain: $GITEA_DOMAIN
+
+  postgres:
+    image: docker.io/library/postgres:14
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=${GITEA_DB_PASSWORD:-gitea}
+      - POSTGRES_DB=gitea
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+volumes:
+  gitea-data: {}
+  pg-data: {}

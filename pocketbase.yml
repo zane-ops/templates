@@ -1,0 +1,35 @@
+# IMPORTANT: Please update the admin credentials in your .env file
+# Access PocketBase Admin UI at: https://your-domain.com/_/ (replace with your configured domain)
+# Note: Admin UI may take up to 1 minute to load on first startup
+version: "3.8"
+
+x-zane-env:
+  ADMIN_EMAIL: "{{ generate_email }}"
+  ADMIN_PASSWORD: "{{ generate_password | 32 }}"
+  APP_DOMAIN: "{{ generate_domain }}"
+  ENCRYPTION_KEY: "{{ generate_password | 32 }}"
+
+services:
+  pocketbase:
+    image: adrianmusante/pocketbase:latest
+    restart: always
+    volumes:
+      - pocketbase-data:/pocketbase
+    environment:
+      - POCKETBASE_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - POCKETBASE_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - POCKETBASE_ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - POCKETBASE_ADMIN_UPSERT=true
+      - POCKETBASE_PORT_NUMBER=8090
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/_/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      labels:
+        zane.http.routes.0.port: 8090
+        zane.http.routes.0.domain: ${APP_DOMAIN}
+
+volumes:
+  pocketbase-data: {}
