@@ -1,6 +1,6 @@
 x-zane-env:
-  CFRAME_ADMIN_EMAIL: hello@fredkiss.dev
-  CFRAME_ADMIN_NAME: fredkisss
+  CFRAME_ADMIN_EMAIL: "{{ generate_email }}"
+  CFRAME_ADMIN_NAME: "{{ generate_username }}"
   CFRAME_ADMIN_PASSWORD: "{{ generate_password | 8 }}"
   NUXT_SESSION_PASSWORD: "{{ generate_password | 32 }}"
   CF_DOMAIN: "{{ generate_domain }}"
@@ -19,16 +19,17 @@ services:
       - CFRAME_ADMIN_NAME=$CFRAME_ADMIN_NAME
       # Admin password (optional, default CF1234@!)
       - CFRAME_ADMIN_PASSWORD=$CFRAME_ADMIN_PASSWORD
-      - NUXT_ALLOW_INSECURE_COOKIE=true
+      # Allow access via HTTP: ONLY LOCALLY !!
+      # - NUXT_ALLOW_INSECURE_COOKIE=true
       # Site metadata (all optional)
-      - NUXT_PUBLIC_APP_TITLE=fred's lib
-      - NUXT_PUBLIC_APP_SLOGAN=fun fun fun
-      - NUXT_PUBLIC_APP_AUTHOR=fredkisss
-      - NUXT_PUBLIC_APP_AVATAR_URL=https://github.com/fredkiss3.png
+      - NUXT_PUBLIC_APP_TITLE
+      - NUXT_PUBLIC_APP_SLOGAN
+      - NUXT_PUBLIC_APP_AUTHOR
+      - NUXT_PUBLIC_APP_AVATAR_URL
       # Map provider (maplibre/mapbox)
       - NUXT_PUBLIC_MAP_PROVIDER=maplibre
       # MapTiler access token for MapLibre
-      - NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN=bYkKp9UznQZ5h8yHrvkt
+      - NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN
       # Storage provider (local)
       - NUXT_STORAGE_PROVIDER=local
       - NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
@@ -36,11 +37,11 @@ services:
       - NUXT_SESSION_PASSWORD=$NUXT_SESSION_PASSWORD
       # Storage provider (s3)
       # - NUXT_STORAGE_PROVIDER=s3
-      # - NUXT_PROVIDER_S3_ENDPOINT=https://rustfs-local.zaneops.dev/
-      # - NUXT_PROVIDER_S3_BUCKET=chronoframe
+      # - NUXT_PROVIDER_S3_ENDPOINT
+      # - NUXT_PROVIDER_S3_BUCKET
       # - NUXT_PROVIDER_S3_REGION=us-east-1
-      # - NUXT_PROVIDER_S3_ACCESS_KEY_ID=4qgGb7Cj03WKhep6cnJy
-      # - NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=vsRoqJDVGTlHEfO96mASrk1Czdiycx7hQaWt5wZ0
+      # - NUXT_PROVIDER_S3_ACCESS_KEY_ID
+      # - NUXT_PROVIDER_S3_SECRET_ACCESS_KEY
     deploy:
       labels:
         zane.http.routes.0.port: 3000
