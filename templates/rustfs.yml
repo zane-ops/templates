@@ -1,7 +1,7 @@
 x-zane-env:
   RUSTFS_DOMAIN: "{{ generate_domain }}"
   RUSTFS_API_DOMAIN: "{{ generate_domain }}"
-  RUSTFS_ACCESS_KEY: rustfs
+  RUSTFS_ACCESS_KEY: "{{ generate_username }}"
   RUSTFS_SECRET_KEY: "{{ generate_password | 32 }}"
 
 services:
