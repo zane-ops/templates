@@ -23,7 +23,6 @@ x-zane-env:
 services:
   op-db:
     image: postgres:14-alpine
-    restart: always
     volumes:
       - type: volume
         target: /var/lib/postgresql/data
@@ -41,7 +40,6 @@ services:
       - POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}
   op-kv:
     image: redis:7.2.5-alpine
-    restart: always
     volumes:
       - type: volume
         target: /data
@@ -61,7 +59,6 @@ services:
       retries: 5
   op-ch:
     image: clickhouse/clickhouse-server:25.10.2.65
-    restart: always
     volumes:
       - type: volume
         target: /var/lib/clickhouse
@@ -85,14 +82,28 @@ services:
         target: /docker-entrypoint-initdb.d/1_init-db.sql
   op-api:
     image: lindesvard/openpanel-api:${OP_API_VERSION:-latest}
-    restart: always
-    command:
-      "sh -c \"\n  echo 'Waiting for PostgreSQL to be ready...'\n  while !\
-      \ nc -z op-db 5432; do\n    sleep 1\n  done\n  echo 'PostgreSQL is ready'\n\n\
-      \  echo 'Waiting for ClickHouse to be ready...'\n  while ! nc -z op-ch 8123;\
-      \ do\n    sleep 1\n  done\n  echo 'ClickHouse is ready'\n\n  echo 'Running migrations...'\n\
-      \  \n  echo '$DATABASE_URL'\n\n  CI=true pnpm -r run migrate:deploy\n\n  pnpm\
-      \ start\n\"\n"
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...'
+        while ! nc -z op-db 5432; do
+          sleep 1
+        done
+        echo 'PostgreSQL is ready'
+
+        echo 'Waiting for ClickHouse to be ready...'
+        while ! nc -z op-ch 8123; do
+          sleep 1
+        done
+        echo 'ClickHouse is ready'
+
+        echo 'Running migrations...'
+        
+        echo '$DATABASE_URL'
+
+        CI=true pnpm -r run migrate:deploy
+
+        pnpm start
+      "
     environment:
       DATABASE_URL: postgres://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@op-db:5432/${OPENPANEL_POSTGRES_DB}?schema=public
       DATABASE_URL_DIRECT: postgres://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@op-db:5432/${OPENPANEL_POSTGRES_DB}?schema=public
@@ -120,17 +131,13 @@ services:
       - op-db
       - op-ch
       - op-kv
-    ports: []
     deploy:
       labels:
         zane.http.routes.0.domain: ${api_domain}
         zane.http.routes.0.base_path: /
         zane.http.routes.0.port: 3000
-        zane.http.routes.0.strip_prefix: "false"
-    volumes: []
   op-dashboard:
     image: lindesvard/openpanel-dashboard:${OP_DASHBOARD_VERSION:-latest}
-    restart: always
     depends_on:
       - op-api
     environment:
@@ -151,17 +158,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports: []
     deploy:
       labels:
         zane.http.routes.0.domain: ${main_domain}
         zane.http.routes.0.base_path: /
         zane.http.routes.0.port: 3000
-        zane.http.routes.0.strip_prefix: "false"
-    volumes: []
   op-worker:
     image: lindesvard/openpanel-worker:${OP_WORKER_VERSION:-latest}
-    restart: always
     depends_on:
       - op-api
     environment:
@@ -183,7 +186,7 @@ services:
       retries: 5
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: ${OP_WORKER_REPLICAS:-1}
     volumes: []
 x-database:
   DATABASE_URL: postgres://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@op-db:5432/${OPENPANEL_POSTGRES_DB}?schema=public
@@ -199,26 +202,44 @@ volumes:
   op-proxy-config:
 configs:
   clickhouse-config.xml:
-    content:
-      "    <clickhouse>\n        <logger>\n            <level>warning</level>\n\
-      \            <console>true</console>\n        </logger>\n        <keep_alive_timeout>10</keep_alive_timeout>\n\
-      \        <!-- Stop all the unnecessary logging -->\n        <query_thread_log\
-      \ remove=\"remove\"/>\n        <query_log remove=\"remove\"/>\n        <text_log\
-      \ remove=\"remove\"/>\n        <trace_log remove=\"remove\"/>\n        <metric_log\
-      \ remove=\"remove\"/>\n        <asynchronous_metric_log remove=\"remove\"/>\n\
-      \        <session_log remove=\"remove\"/>\n        <part_log remove=\"remove\"\
-      />\n        <listen_host>0.0.0.0</listen_host>\n        <interserver_listen_host>0.0.0.0</interserver_listen_host>\n\
-      \        <interserver_http_host>opch</interserver_http_host>\n        <!-- Disable\
-      \ cgroup memory observer -->\n        <cgroups_memory_usage_observer_wait_time>0</cgroups_memory_usage_observer_wait_time>\n\
-      \        <!-- Not used anymore, but kept for backwards compatibility -->\n \
-      \       <macros>\n            <shard>1</shard>\n            <replica>replica1</replica>\n\
-      \            <cluster>openpanel_cluster</cluster>\n        </macros>\n    </clickhouse>\n"
+    content: |
+      <clickhouse>
+          <logger>
+              <level>warning</level>
+              <console>true</console>
+          </logger>
+          <keep_alive_timeout>10</keep_alive_timeout>
+          <!-- Stop all the unnecessary logging -->
+          <query_thread_log remove="remove"/>
+          <query_log remove="remove"/>
+          <text_log remove="remove"/>
+          <trace_log remove="remove"/>
+          <metric_log remove="remove"/>
+          <asynchronous_metric_log remove="remove"/>
+          <session_log remove="remove"/>
+          <part_log remove="remove"/>
+          <listen_host>0.0.0.0</listen_host>
+          <interserver_listen_host>0.0.0.0</interserver_listen_host>
+          <interserver_http_host>opch</interserver_http_host>
+          <!-- Disable cgroup memory observer -->
+          <cgroups_memory_usage_observer_wait_time>0</cgroups_memory_usage_observer_wait_time>
+          <!-- Not used anymore, but kept for backwards compatibility -->
+          <macros>
+              <shard>1</shard>
+              <replica>replica1</replica>
+              <cluster>openpanel_cluster</cluster>
+          </macros>
+      </clickhouse>
   clickhouse-user-config.xml:
-    content:
-      "    <clickhouse>\n        <profiles>\n        <default>\n          \
-      \  <log_queries>0</log_queries>\n            <log_query_threads>0</log_query_threads>\n\
-      \        </default>\n    </profiles>\n    </clickhouse>\n"
+    content: |
+      <clickhouse>
+          <profiles>
+          <default>
+              <log_queries>0</log_queries>
+              <log_query_threads>0</log_query_threads>
+          </default>
+      </profiles>
+      </clickhouse>
   init-db.sql:
-    content: "CREATE DATABASE IF NOT EXISTS openpanel;
-
-      "
+    content: |
+      CREATE DATABASE IF NOT EXISTS openpanel;
