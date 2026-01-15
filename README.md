@@ -14,30 +14,30 @@ ZaneOps is a platform for deploying and managing containerized applications. The
 
 ## Available Templates
 
-| Template | Description | Stack |
-|----------|-------------|-------|
-| [authentik.yml](authentik.yml) | Identity provider and SSO solution | PostgreSQL, Redis |
-| [caddy.yml](caddy.yml) | Modern reverse proxy and web server | Standalone |
-| [chronoframe.yml](chronoframe.yml) | Time tracking application | Redis |
-| [gitea.yml](gitea.yml) | Self-hosted Git service | PostgreSQL |
-| [grafana.yml](grafana.yml) | Monitoring and visualization platform | Standalone |
-| [immich.yml](immich.yml) | Self-hosted photo and video management | PostgreSQL, Redis, ML |
-| [n8n.yml](n8n.yml) | Workflow automation platform | PostgreSQL |
-| [openpanel.yml](openpanel.yml) | Open-source analytics platform | PostgreSQL, Redis, ClickHouse |
-| [penpot.yml](penpot.yml) | Open-source design and prototyping | Multiple services |
-| [pocketbase.yml](pocketbase.yml) | Backend-as-a-Service in one file | SQLite (embedded) |
-| [postgres.yml](postgres.yml) | PostgreSQL database server | Standalone |
-| [rustfs.yml](rustfs.yml) | Rust-based file system service | Standalone |
-| [rybbit.yml](rybbit.yml) | Analytics and tracking platform | PostgreSQL, ClickHouse |
-| [typesense.yml](typesense.yml) | Fast, typo-tolerant search engine | Standalone |
-| [valkey.yml](valkey.yml) | Redis-compatible key-value store | Standalone |
+| Template                           | Description                            | Stack                         |
+| ---------------------------------- | -------------------------------------- | ----------------------------- |
+| [authentik.yml](authentik.yml)     | Identity provider and SSO solution     | PostgreSQL, Redis             |
+| [caddy.yml](caddy.yml)             | Modern reverse proxy and web server    | Standalone                    |
+| [chronoframe.yml](chronoframe.yml) | Time tracking application              | Redis                         |
+| [gitea.yml](gitea.yml)             | Self-hosted Git service                | PostgreSQL                    |
+| [grafana.yml](grafana.yml)         | Monitoring and visualization platform  | Standalone                    |
+| [immich.yml](immich.yml)           | Self-hosted photo and video management | PostgreSQL, Redis, ML         |
+| [n8n.yml](n8n.yml)                 | Workflow automation platform           | PostgreSQL                    |
+| [openpanel.yml](openpanel.yml)     | Open-source analytics platform         | PostgreSQL, Redis, ClickHouse |
+| [penpot.yml](penpot.yml)           | Open-source design and prototyping     | Multiple services             |
+| [pocketbase.yml](pocketbase.yml)   | Backend-as-a-Service in one file       | SQLite (embedded)             |
+| [postgres.yml](postgres.yml)       | PostgreSQL database server             | Standalone                    |
+| [rustfs.yml](rustfs.yml)           | Rust-based file system service         | Standalone                    |
+| [rybbit.yml](rybbit.yml)           | Analytics and tracking platform        | PostgreSQL, ClickHouse        |
+| [typesense.yml](typesense.yml)     | Fast, typo-tolerant search engine      | Standalone                    |
+| [valkey.yml](valkey.yml)           | Redis-compatible key-value store       | Standalone                    |
 
 ## Usage
 
 ### Deploying on ZaneOps
 
 1. Choose a template from this repository
-2. Upload the `.yml` file to your ZaneOps instance
+2. Copy/Paste the `.yml` file contents to your ZaneOps instance
 3. ZaneOps will automatically:
    - Generate secure passwords and secrets
    - Assign domains to your services
