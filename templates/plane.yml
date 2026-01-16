@@ -13,7 +13,7 @@ x-zane-env:
   REDIS_URL: redis://plane-redis:6379/
   MINIO_ROOT_USER: "{{ generate_username }}"
   MINIO_ROOT_PASSWORD: "{{ generate_password | 32 }}"
-  AWS_REGION:
+  AWS_REGION: ""
   AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
   AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
   AWS_S3_ENDPOINT_URL: http://plane-minio:9000
@@ -29,8 +29,6 @@ x-zane-env:
   RABBITMQ_VHOST: plane
   API_BASE_URL: http://api:8000
   DEBUG: 0
-  SENTRY_DSN:
-  SENTRY_ENVIRONMENT: production
   CORS_ALLOWED_ORIGINS: http://$APP_DOMAIN # or https://$APP_DOMAIN
   GUNICORN_WORKERS: 1
   USE_MINIO: 1
@@ -41,6 +39,7 @@ x-zane-env:
   MINIO_ENDPOINT_SSL: 0
   APP_RELEASE: v1.2.1
   LIVE_SERVER_SECRET_KEY: "{{ generate_password | 32 }}"
+  API_DNS_NAME: "{{ network_alias | 'api' }}"
 
 x-db-env: &db-env
   PGHOST: ${PGHOST:-plane-db}
@@ -77,9 +76,9 @@ x-proxy-env: &proxy-env
 x-mq-env: &mq-env # RabbitMQ Settings
   RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
   RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-  RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
-  RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-plane}
-  RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-plane}
+  RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-plane}
+  RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-plane}
+  RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-plane}
   RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
 
 x-live-env: &live-env
@@ -101,55 +100,45 @@ x-app-env: &app-env
 
 services:
   web:
-    image: artifacts.plane.so/makeplane/plane-frontend:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-frontend:${APP_RELEASE:-v1.2.1}
     deploy:
       replicas: ${WEB_REPLICAS:-1}
-      restart_policy:
-        condition: any
     depends_on:
       - api
       - worker
 
   space:
-    image: artifacts.plane.so/makeplane/plane-space:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-space:${APP_RELEASE:-v1.2.1}
     deploy:
       replicas: ${SPACE_REPLICAS:-1}
-      restart_policy:
-        condition: any
     depends_on:
       - api
       - worker
       - web
 
   admin:
-    image: artifacts.plane.so/makeplane/plane-admin:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-admin:${APP_RELEASE:-v1.2.1}
     deploy:
       replicas: ${ADMIN_REPLICAS:-1}
-      restart_policy:
-        condition: any
     depends_on:
       - api
       - web
 
   live:
-    image: artifacts.plane.so/makeplane/plane-live:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-live:${APP_RELEASE:-v1.2.1}
     environment:
       <<: [*live-env, *redis-env]
     deploy:
       replicas: ${LIVE_REPLICAS:-1}
-      restart_policy:
-        condition: any
     depends_on:
       - api
       - web
 
   api:
-    image: artifacts.plane.so/makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
     command: ./bin/docker-entrypoint-api.sh
     deploy:
       replicas: ${API_REPLICAS:-1}
-      restart_policy:
-        condition: any
     volumes:
       - logs_api:/code/plane/logs
     environment:
@@ -160,12 +149,10 @@ services:
       - plane-mq
 
   worker:
-    image: artifacts.plane.so/makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
     command: ./bin/docker-entrypoint-worker.sh
     deploy:
       replicas: ${WORKER_REPLICAS:-1}
-      restart_policy:
-        condition: any
     volumes:
       - logs_worker:/code/plane/logs
     environment:
@@ -177,12 +164,10 @@ services:
       - plane-mq
 
   beat-worker:
-    image: artifacts.plane.so/makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
     command: ./bin/docker-entrypoint-beat.sh
     deploy:
       replicas: ${BEAT_WORKER_REPLICAS:-1}
-      restart_policy:
-        condition: any
     volumes:
       - logs_beat-worker:/code/plane/logs
     environment:
@@ -194,10 +179,10 @@ services:
       - plane-mq
 
   migrator:
-    image: artifacts.plane.so/makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.2.1}
     command: ./bin/docker-entrypoint-migrator.sh
     deploy:
-      replicas: 1
+      mode: replicated-job
       restart_policy:
         condition: on-failure
     volumes:
@@ -212,10 +197,6 @@ services:
   plane-db:
     image: postgres:15.7-alpine
     command: postgres -c 'max_connections=1000'
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
     environment:
       <<: *db-env
     volumes:
@@ -223,19 +204,11 @@ services:
 
   plane-redis:
     image: valkey/valkey:7.2.11-alpine
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
     volumes:
       - redisdata:/data
 
   plane-mq:
     image: rabbitmq:3.13.6-management-alpine
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
     environment:
       <<: *mq-env
     volumes:
@@ -245,10 +218,6 @@ services:
   plane-minio:
     image: minio/minio:latest
     command: server /export --console-address ":9090"
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
     environment:
       <<: *minio-env
     volumes:
@@ -256,17 +225,16 @@ services:
 
   # Comment this if you already have a reverse proxy running
   proxy:
-    image: artifacts.plane.so/makeplane/plane-proxy:${APP_RELEASE:-v1.2.1}
+    image: makeplane/plane-proxy:${APP_RELEASE:-v1.2.1}
     deploy:
       labels:
         zane.http.routes.0.domain: $APP_DOMAIN
         zane.http.routes.0.port: 80
-      replicas: 1
-      restart_policy:
-        condition: any
     environment:
       <<: *proxy-env
-
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
     volumes:
       - proxy_config:/config
       - proxy_data:/data
@@ -286,3 +254,37 @@ volumes:
   logs_beat-worker:
   logs_migrator:
   rabbitmq_data:
+  proxy_config:
+  proxy_data:
+configs:
+  caddyfile:
+    content: |
+      {
+          servers {
+                  max_header_size 25MB
+                  client_ip_headers X-Forwarded-For X-Real-IP
+                  trusted_proxies static 0.0.0.0/0
+          }
+      }
+      :80 {
+              request_body {
+                      max_size ${FILE_SIZE_LIMIT}
+              }
+
+              redir /spaces /spaces/ permanent
+              reverse_proxy /spaces/* space:3000
+
+              redir /god-mode /god-mode/ permanent
+              reverse_proxy /god-mode/* admin:3000
+
+              reverse_proxy /live/* live:3000
+
+              reverse_proxy /api/* ${API_DNS_NAME}:8000 # prevent conflict with zaneops `api` container name 
+
+              reverse_proxy /auth/* ${API_DNS_NAME}:8000 # prevent conflict with zaneops `api` container name
+
+              reverse_proxy /${BUCKET_NAME}/* plane-minio:9000
+              reverse_proxy /${BUCKET_NAME} plane-minio:9000
+
+              reverse_proxy /* web:3000
+      }
