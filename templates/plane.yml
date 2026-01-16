@@ -47,7 +47,7 @@ services:
     depends_on:
       - api
       - worker
-    environment::
+    environment:
       <<: *env-vars
 
   space:
@@ -57,7 +57,7 @@ services:
       - api
       - worker
       - web
-    environment::
+    environment:
       <<: *env-vars
 
   admin:
@@ -66,7 +66,7 @@ services:
     depends_on:
       - api
       - web
-    environment::
+    environment:
       <<: *env-vars
 
   live:
@@ -75,7 +75,7 @@ services:
     depends_on:
       - api
       - web
-    environment::
+    environment:
       <<: *env-vars
 
   api:
@@ -87,7 +87,7 @@ services:
       - plane-db
       - plane-redis
       - plane-mq
-    environment::
+    environment:
       <<: *env-vars
 
   worker:
@@ -100,7 +100,7 @@ services:
       - plane-db
       - plane-redis
       - plane-mq
-    environment::
+    environment:
       <<: *env-vars
 
   beat-worker:
@@ -113,7 +113,7 @@ services:
       - plane-db
       - plane-redis
       - plane-mq
-    environment::
+    environment:
       <<: *env-vars
 
   migrator:
@@ -124,7 +124,7 @@ services:
     depends_on:
       - plane-db
       - plane-redis
-    environment::
+    environment:
       <<: *env-vars
 
   plane-db:
@@ -132,21 +132,21 @@ services:
     command: postgres -c 'max_connections=1000'
     volumes:
       - pgdata:/var/lib/postgresql/data
-    environment::
+    environment:
       <<: *env-vars
 
   plane-redis:
     image: valkey/valkey:7.2.5-alpine
     volumes:
       - redisdata:/data
-    environment::
+    environment:
       <<: *env-vars
 
   plane-mq:
     image: rabbitmq:3.13.6-management-alpine
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    environment::
+    environment:
       <<: *env-vars
 
   plane-minio:
@@ -154,7 +154,7 @@ services:
     command: server /export --console-address ":9090"
     volumes:
       - uploads:/export
-    environment::
+    environment:
       <<: *env-vars
 
   proxy:
@@ -163,7 +163,7 @@ services:
       - web
       - api
       - space
-    environment::
+    environment:
       <<: *env-vars
 
 volumes:
