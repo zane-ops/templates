@@ -58,11 +58,6 @@ services:
       REDIS_HOSTNAME: ${REDIS_HOSTNAME}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_DBINDEX: ${REDIS_DBINDEX}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3003/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   immich-redis:
     image: redis:6.2-alpine
@@ -86,7 +81,7 @@ services:
       POSTGRES_DB: immich
       POSTGRES_INITDB_ARGS: "--data-checksums"
     healthcheck:
-      test: pg_isready -U ${DB_USERNAME} -d immich || exit 1
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
