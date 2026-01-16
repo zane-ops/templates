@@ -1,3 +1,4 @@
 .claude/
 .venv/
 .env
+.env.local
