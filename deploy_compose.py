@@ -16,12 +16,17 @@ from typing import cast
 
 import requests
 import yaml
+import dotenv
 
-BASE_URL = "http://localhost:8000"
-PROJECT_SLUG = "compose"
-ENV_SLUG = "production"
-USERNAME = "admin"
-PASSWORD = "password"
+dotenv.load_dotenv()
+
+import os
+
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
+PROJECT_SLUG = os.environ.get("PROJECT_SLUG", "compose")
+ENV_SLUG = os.environ.get("ENV_SLUG", "production")
+USERNAME = os.environ.get("USERNAME", "admin")
+PASSWORD = os.environ.get("PASSWORD", "password")
 
 
 def get_csrf_token(session: requests.Session, base_url: str) -> str:
