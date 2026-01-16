@@ -51,7 +51,6 @@ services:
       interval: 5s
       start_period: 10s
     deploy:
-      replicas: 0
       labels:
         zane.http.routes.0.domain: ${backend_domain}
         zane.http.routes.0.base_path: /
@@ -74,7 +73,6 @@ services:
       backend:
         condition: service_healthy
     deploy:
-      replicas: 0
       labels:
         zane.http.routes.0.domain: ${dashboard_domain}
         zane.http.routes.0.base_path: /
