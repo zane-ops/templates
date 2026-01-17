@@ -2206,8 +2206,3 @@ ZaneOps extends Docker Compose with powerful template expressions and automatic 
 9. **Value persistence** - generated secrets reused across deployments
 10. **Dokploy compatibility** - easy migration from existing templates
 
-For more details, refer to:
-- Implementation notes: `/Users/fredkiss3/Developer/zane-ops/backend/notes/docker-compose.md`
-- Processor code: `/Users/fredkiss3/Developer/zane-ops/backend/compose/processor.py`
-- Adapter code: `/Users/fredkiss3/Developer/zane-ops/backend/compose/adapters.py`
-- Test fixtures: `/Users/fredkiss3/Developer/zane-ops/backend/compose/tests/fixtures.py`
