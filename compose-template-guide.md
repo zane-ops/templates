@@ -1576,8 +1576,8 @@ x-zane-env:
   main_domain: "{{ generate_domain }}"
   db_password: "{{ generate_password | 32 }}"
   admin_email: "{{ generate_email }}"
-  DB_PASSWORD: "${db_password}"
-  ADMIN_EMAIL: "${admin_email}"
+  DB_PASSWORD: ${db_password}
+  ADMIN_EMAIL: ${admin_email}
 
 services:
   web:
