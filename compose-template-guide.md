@@ -1531,6 +1531,20 @@ The `DokployComposeAdapter.to_zaneops(base64_template)` method:
 
 ### Example Migration
 
+**Dokploy compose.yaml**:
+```yaml
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    environment:
+      DB_PASSWORD: ${db_password}
+      ADMIN_EMAIL: ${admin_email}
+    volumes:
+      - ../files/nginx.conf:/etc/nginx/nginx.conf:ro
+```
+
 **Dokploy config.toml**:
 ```toml
 [variables]
@@ -1548,7 +1562,7 @@ DB_PASSWORD = "${db_password}"
 ADMIN_EMAIL = "${admin_email}"
 
 [[config.mounts]]
-filePath = "./nginx.conf"
+filePath = "nginx.conf"
 content = """
 server {
   listen 80;
