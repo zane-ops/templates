@@ -1011,8 +1011,8 @@ services:
 **DNS Resolution**:
 
 In the **`zane` network**:
-- `abc123_app.zane-internal.localhost`
-- `abc123_postgres.zane-internal.localhost`
+- `abc123_app.zaneops.internal`
+- `abc123_postgres.zaneops.internal`
 
 In the **environment network**:
 - `{network_alias_prefix}-app` (e.g., `my-stack-app`)
