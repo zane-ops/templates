@@ -1184,47 +1184,6 @@ services:
 
 ---
 
-### Environment Variable Overrides
-
-ZaneOps allows overriding any variable via the API using `ComposeStackEnvOverride`:
-
-**API endpoint**:
-```http
-POST /api/projects/{project_slug}/environments/{env_slug}/compose-stacks/{stack_slug}/env-overrides/
-Content-Type: application/json
-
-{
-  "key": "DB_PASSWORD",
-  "value": "my-custom-password"
-}
-```
-
-**Effect**:
-- Next deployment uses `my-custom-password` instead of generated value
-- Template expression no longer evaluated for this variable
-- Override persists across deployments
-
-**Listing overrides**:
-```http
-GET /api/projects/{project_slug}/environments/{env_slug}/compose-stacks/{stack_slug}/env-overrides/
-```
-
-**Updating override**:
-```http
-PATCH /api/projects/{project_slug}/environments/{env_slug}/compose-stacks/{stack_slug}/env-overrides/{id}/
-Content-Type: application/json
-
-{
-  "value": "new-password"
-}
-```
-
-**Deleting override**:
-```http
-DELETE /api/projects/{project_slug}/environments/{env_slug}/compose-stacks/{stack_slug}/env-overrides/{id}/
-```
-
----
 
 ## Service Dependencies
 
