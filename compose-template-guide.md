@@ -276,11 +276,11 @@ x-zane-env:
 
 #### 7. `network_alias | 'service_name'`
 
-Generates an environment-scoped network alias for inter-service communication.
+Generates an environment-scoped network alias for inter-service communication within the same environment.
 
 **Format**: `{network_alias_prefix}-{service_name}`
 
-**Use case**: Services communicating within the same environment, stable across PR preview environments.
+**Use case**: Services communicating within the same environment (e.g., all services in "production" or all services in "staging").
 
 ```yaml
 x-zane-env:
@@ -295,18 +295,18 @@ x-zane-env:
 
 **Why use this?**
 - Stable across deployments (doesn't change when stack is redeployed)
-- Consistent in PR preview environments
-- Preferred for service-to-service communication
+- Scoped to the environment - services in the same environment can communicate
+- Preferred for most service-to-service communication
 
 ---
 
 #### 8. `global_alias | 'service_name'`
 
-Generates a globally unique network alias using the stack's hash prefix.
+Generates a globally unique network alias that is accessible across all of ZaneOps - across all projects and environments.
 
 **Format**: `{hash_prefix}_{service_name}`
 
-**Use case**: Cross-stack communication (advanced), debugging.
+**Use case**: Cross-project or cross-environment communication.
 
 ```yaml
 x-zane-env:
@@ -318,9 +318,10 @@ x-zane-env:
   - `abc123_postgres`
 
 **When to use**:
-- Cross-stack references (rare)
+- Cross-project service references
+- Cross-environment communication (e.g., staging service connecting to production database)
 - Debugging and troubleshooting
-- Most cases should use `network_alias` instead
+- Most cases should use `network_alias` instead for environment isolation
 
 ---
 
@@ -763,12 +764,12 @@ configs:
 
 **Or use absolute paths**:
 ```yaml
-# ✅ Correct approach for host directories
+# ✅ Correct approach for host directories/files
 services:
-  web:
-    image: nginx:alpine
+  portainer:
+    image: portainer/portainer-ce:latest
     volumes:
-      - /data/html:/usr/share/nginx/html:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 ```
 
 **Note**: The `../files/` path pattern is only handled by the [Dokploy Migration Adapter](#dokploy-template-migration) when converting Dokploy templates to ZaneOps format. It is not valid syntax for native ZaneOps templates.
