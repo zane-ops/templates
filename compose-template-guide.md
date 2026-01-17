@@ -186,7 +186,6 @@ Generates a cryptographically secure random password as a hexadecimal string.
 **Requirements**:
 - Length must be even (divisible by 2)
 - Minimum length: 8
-- Maximum length: 256
 
 ```yaml
 x-zane-env:
@@ -1999,7 +1998,7 @@ x-zane-env:
   PASSWORD: "{{ generate_password | 32 }}"
 ```
 
-**Valid lengths**: 8, 10, 12, 14, 16, 18, 20, ..., 256 (any even number from 8 to 256)
+**Valid lengths**: 8, 10, 12, 14, 16, 18, 20, ... (any even number 8 or greater)
 
 ---
 
