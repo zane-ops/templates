@@ -139,6 +139,9 @@ Use the included `deploy_compose.py` script to deploy templates directly from th
 # Install dependencies
 pip install -r requirements.txt
 
+# Copy .env.example to .env and configure your settings
+cp .env.example .env
+
 # Deploy a template
 python deploy_compose.py -f n8n.yml -p my-project -e production
 
@@ -161,6 +164,8 @@ python deploy_compose.py -f grafana.yml -p my-project -e production -u https://z
 | `--username` | Login username | `admin` |
 | `--password` | Login password | `password` |
 | `-m, --message` | Deployment commit message | `Deploy from CLI` |
+
+**Environment Variables:** Copy `.env.example` to `.env` to preload default values for `BASE_URL`, `PROJECT_SLUG`, `ENV_SLUG`, `USERNAME`, and `PASSWORD`. Command-line flags override `.env` values.
 
 The script will create or update the stack and trigger a deployment, then display the generated URLs, configs, and volumes.
 
