@@ -1539,8 +1539,8 @@ services:
     ports:
       - "8080:80"
     environment:
-      DB_PASSWORD: ${db_password}
-      ADMIN_EMAIL: ${admin_email}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
     volumes:
       - ../files/nginx.conf:/etc/nginx/nginx.conf:ro
 ```
@@ -1576,13 +1576,15 @@ x-zane-env:
   main_domain: "{{ generate_domain }}"
   db_password: "{{ generate_password | 32 }}"
   admin_email: "{{ generate_email }}"
+  DB_PASSWORD: "${db_password}"
+  ADMIN_EMAIL: "${admin_email}"
 
 services:
   web:
     image: nginx:alpine
     environment:
-      DB_PASSWORD: ${db_password}
-      ADMIN_EMAIL: ${admin_email}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
     configs:
       - source: nginx.conf
         target: /etc/nginx/nginx.conf
