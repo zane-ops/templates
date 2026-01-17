@@ -543,7 +543,9 @@ services:
 #### Optional Properties
 
 - **`zane.http.routes.{N}.base_path`**: Path prefix (default: `/`)
-- **`zane.http.routes.{N}.strip_prefix`**: Whether to strip base_path before proxying (default: `false`)
+- **`zane.http.routes.{N}.strip_prefix`**: Whether to strip base_path before proxying (default: `true`).
+  Setting it to `true` means if your `base_path` is `/api` and you receive a request to `/api/auth/login`, your 
+  service will receive a request to `/auth/login`.
 
 ---
 
@@ -1487,20 +1489,20 @@ Example Dokploy template structure (decoded):
 
 Dokploy placeholders are automatically converted to ZaneOps template expressions:
 
-| Dokploy Placeholder | ZaneOps Expression |
-|---------------------|-------------------|
-| `${domain}` | `{{ generate_domain }}` |
-| `${email}` | `{{ generate_email }}` |
-| `${username}` | `{{ generate_username }}` |
-| `${uuid}` | `{{ generate_uuid }}` |
-| `${password}` | `{{ generate_password \| 32 }}` |
-| `${password:16}` | `{{ generate_password \| 16 }}` |
-| `${base64}` | `{{ generate_password \| 32 }}` |
-| `${base64:64}` | `{{ generate_password \| 64 }}` |
-| `${hash}` | `{{ generate_password \| 32 }}` |
-| `${hash:16}` | `{{ generate_password \| 16 }}` |
-| `${jwt}` | `{{ generate_password \| 32 }}` |
-| `${jwt:64}` | `{{ generate_password \| 64 }}` |
+| Dokploy Placeholder | ZaneOps Expression              |
+| ------------------- | ------------------------------- |
+| `${domain}`         | `{{ generate_domain }}`         |
+| `${email}`          | `{{ generate_email }}`          |
+| `${username}`       | `{{ generate_username }}`       |
+| `${uuid}`           | `{{ generate_uuid }}`           |
+| `${password}`       | `{{ generate_password \| 32 }}` |
+| `${password:16}`    | `{{ generate_password \| 16 }}` |
+| `${base64}`         | `{{ generate_password \| 32 }}` |
+| `${base64:64}`      | `{{ generate_password \| 64 }}` |
+| `${hash}`           | `{{ generate_password \| 32 }}` |
+| `${hash:16}`        | `{{ generate_password \| 16 }}` |
+| `${jwt}`            | `{{ generate_password \| 32 }}` |
+| `${jwt:64}`         | `{{ generate_password \| 64 }}` |
 
 ---
 
