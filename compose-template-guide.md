@@ -1542,7 +1542,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
     volumes:
-      - ../files/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../files/nginx.conf:/etc/nginx/nginx.conf
 ```
 
 **Dokploy config.toml**:
