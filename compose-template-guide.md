@@ -667,7 +667,7 @@ zane.http.routes.0.strip_prefix: "yes"  # Must be "true" or "false"
 
 ## Volumes
 
-ZaneOps supports three types of volume mounts: **named volumes**, **bind mounts**, and **external volumes**.
+ZaneOps supports **named volumes**, **absolute path bind mounts**, and **external volumes**. Relative path bind mounts are **not supported** and will be rejected during validation.
 
 ### Named Volumes
 
@@ -708,23 +708,70 @@ volumes:
 
 ---
 
-### Bind Mounts (Relative Paths)
+### Absolute Path Bind Mounts
 
-Bind mounts map host directories into containers. ZaneOps handles relative paths specially.
+Bind mounts with absolute paths are supported for mapping host directories into containers.
 
 ```yaml
 services:
   web:
     image: nginx:alpine
     volumes:
-      - ./html:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /data/html:/usr/share/nginx/html:ro
+      - /etc/myapp/nginx.conf:/etc/nginx/nginx.conf:ro
 ```
 
-**Important notes**:
-- **Dokploy compatibility**: Paths starting with `../files/` are converted to configs (see [Dokploy Migration](#dokploy-template-migration))
-- **Read-only**: Use `:ro` suffix for read-only mounts
-- **Host paths**: Relative to stack deployment directory (managed by ZaneOps)
+**Properties**:
+- Must use absolute paths (starting with `/`)
+- Useful for accessing host system files or shared storage
+- Use `:ro` suffix for read-only mounts
+
+---
+
+### Relative Paths Not Supported
+
+**Important**: ZaneOps does **not** support relative path bind mounts and will actively validate against them.
+
+```yaml
+# ❌ NOT SUPPORTED - will fail validation
+services:
+  web:
+    image: nginx:alpine
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../data:/app/data
+```
+
+**Use inline configs instead** for configuration files:
+```yaml
+# ✅ Correct approach for config files
+services:
+  web:
+    image: nginx:alpine
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+
+configs:
+  nginx_config:
+    content: |
+      server {
+        listen 80;
+      }
+```
+
+**Or use absolute paths**:
+```yaml
+# ✅ Correct approach for host directories
+services:
+  web:
+    image: nginx:alpine
+    volumes:
+      - /data/html:/usr/share/nginx/html:ro
+```
+
+**Note**: The `../files/` path pattern is only handled by the [Dokploy Migration Adapter](#dokploy-template-migration) when converting Dokploy templates to ZaneOps format. It is not valid syntax for native ZaneOps templates.
 
 ---
 
@@ -761,11 +808,11 @@ services:
       # Named volume (read-only)
       - volume_name:/container/path:ro
 
-      # Bind mount
-      - ./host/path:/container/path
+      # Absolute path bind mount
+      - /host/path:/container/path
 
-      # Bind mount (read-only)
-      - ./host/path:/container/path:ro
+      # Absolute path bind mount (read-only)
+      - /host/path:/container/path:ro
 
       # Long syntax
       - type: volume
@@ -773,6 +820,8 @@ services:
         target: /container/path
         read_only: false
 ```
+
+**Note**: Relative path bind mounts (`./path:/container/path`) are not supported. Use absolute paths, named volumes, or inline configs instead.
 
 ---
 
@@ -1931,17 +1980,17 @@ deploy:
 
 **Symptom**: Data in volume disappears after redeployment.
 
-**Cause**: Using bind mount without persistent host path, or volume not properly defined.
+**Cause**: Volume not properly defined in the `volumes` section.
 
-**Solution**: Use named volumes for persistent data
+**Solution**: Always define named volumes in the top-level `volumes` section
 ```yaml
-# ❌ Wrong - ephemeral bind mount
+# ❌ Wrong - volume not defined
 services:
   db:
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
-# ✅ Correct - named volume
+# ✅ Correct - named volume properly defined
 services:
   db:
     volumes:
