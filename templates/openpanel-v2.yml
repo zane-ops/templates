@@ -1,4 +1,7 @@
 x-zane-env:
+  # issue with `main_domain`: if your `ROOT_DOMAIN` is `127.0.0.1.sslip.io` or `127-0-0-1.sslip.io`, please
+  # manually change this domain value to for ex, the IP address of your machine in your local network or use
+  # a custom domain, ref: https://github.com/Openpanel-dev/openpanel/issues/272#issuecomment-3765763485
   main_domain: "{{ generate_domain }}"
   cookie_secret: "{{ generate_password | 32 }}"
   db_password: "{{ generate_password | 32 }}"
