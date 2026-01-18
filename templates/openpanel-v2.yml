@@ -36,6 +36,8 @@ x-common: &x-common
   REDIS_URL: redis://default:${REDIS_PASSWORD}@op-kv:6379
   CLICKHOUSE_URL: http://op-ch:8123/openpanel
   APP_VERSION: 2.0.1-rc
+  ALLOW_REGISTRATION: "false"
+  BATCH_SIZE: 5000
 
 services:
   op-db:
