@@ -13,6 +13,7 @@ x-zane-env:
   POSTGRES_DB: analytics
   POSTGRES_USER: frog
   POSTGRES_PASSWORD: ${postgres_password}
+
 services:
   rybbit_clickhouse:
     image: clickhouse/clickhouse-server:25.5

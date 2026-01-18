@@ -1,17 +1,15 @@
 x-zane-env:
   main_domain: "{{ generate_domain }}"
-  api_domain: "{{ generate_domain }}"
   db_password: "{{ generate_password | 32 }}"
   cookie_secret: "{{ generate_password | 32 }}"
   redis_password: "{{ generate_password | 32 }}"
   SERVICE_FQDN_OPDASHBOARD: http://${main_domain}
-  SERVICE_FQDN_OPAPI: http://${api_domain}
+  SERVICE_FQDN_OPAPI: http://${main_domain}/api
   OPENPANEL_POSTGRES_DB: openpanel-db
   SERVICE_USER_POSTGRES: openpanel
   SERVICE_PASSWORD_POSTGRES: ${db_password}
   SERVICE_PASSWORD_REDIS: ${redis_password}
   SERVICE_BASE64_COOKIESECRET: ${cookie_secret}
-  OP_WORKER_REPLICAS: "1"
   RESEND_API_KEY: ""
   OPENPANEL_ALLOW_REGISTRATION: "true"
   OPENPANEL_ALLOW_INVITATION: "true"
@@ -58,7 +56,7 @@ services:
       timeout: 5s
       retries: 5
   op-ch:
-    image: clickhouse/clickhouse-server:25.10.2.65
+    image: clickhouse/clickhouse-server:24.3.2-alpine
     volumes:
       - type: volume
         target: /var/lib/clickhouse
@@ -112,6 +110,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_SELF_HOSTED: "true"
       VITE_PUBLIC_SELF_HOSTED: "true"
+      SELF_HOSTED: "true"
       SERVICE_FQDN_OPAPI: /api
       NEXT_PUBLIC_API_URL: $SERVICE_FQDN_OPAPI
       NEXT_PUBLIC_DASHBOARD_URL: $SERVICE_FQDN_OPDASHBOARD
@@ -125,7 +124,7 @@ services:
         - CMD-SHELL
         - curl -f http://localhost:3000/healthcheck || exit 1
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 5
     depends_on:
       - op-db
@@ -133,9 +132,10 @@ services:
       - op-kv
     deploy:
       labels:
-        zane.http.routes.0.domain: ${api_domain}
-        zane.http.routes.0.base_path: /
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.base_path: /api
         zane.http.routes.0.port: 3000
+
   op-dashboard:
     image: lindesvard/openpanel-dashboard:${OP_DASHBOARD_VERSION:-latest}
     depends_on:
@@ -148,6 +148,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_SELF_HOSTED: "true"
       VITE_PUBLIC_SELF_HOSTED: "true"
+      SELF_HOSTED: "true"
       SERVICE_FQDN_OPDASHBOARD:
       NEXT_PUBLIC_API_URL: $SERVICE_FQDN_OPAPI
       NEXT_PUBLIC_DASHBOARD_URL: $SERVICE_FQDN_OPDASHBOARD
@@ -173,9 +174,10 @@ services:
       REDIS_URL: redis://default:${SERVICE_PASSWORD_REDIS}@op-kv:6379
       CLICKHOUSE_URL: ${OPENPANEL_CLICKHOUSE_URL:-http://op-ch:8123/openpanel}
       SERVICE_FQDN_OPBULLBOARD:
-      NODE_ENV=production:
+      NODE_ENV: production
       NEXT_PUBLIC_SELF_HOSTED: "true"
       VITE_PUBLIC_SELF_HOSTED: "true"
+      SELF_HOSTED: "true"
       NEXT_PUBLIC_API_URL: $SERVICE_FQDN_OPAPI
     healthcheck:
       test:
@@ -186,7 +188,7 @@ services:
       retries: 5
     deploy:
       mode: replicated
-      replicas: ${OP_WORKER_REPLICAS:-1}
+      replicas: 1
     volumes: []
 x-database:
   DATABASE_URL: postgres://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@op-db:5432/${OPENPANEL_POSTGRES_DB}?schema=public
