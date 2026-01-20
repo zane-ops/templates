@@ -56,8 +56,8 @@ services:
       - postgres
     deploy:
       labels:
-        zane.http.routes.0.port: $N8N_PORT
-        zane.http.routes.0.domain: $N8N_HOST
+        zane.http.routes.0.port: ${N8N_PORT}
+        zane.http.routes.0.domain: ${N8N_HOST}
 
 volumes:
   n8n_data:
