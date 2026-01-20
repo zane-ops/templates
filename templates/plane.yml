@@ -1,6 +1,6 @@
 x-zane-env:
   APP_DOMAIN: "{{ generate_domain }}"
-  WEB_URL: http://$APP_DOMAIN # or https://$APP_DOMAIN
+  WEB_URL: http://${APP_DOMAIN} # or https://${APP_DOMAIN}
   PGHOST: plane-db
   PGDATABASE: plane
   POSTGRES_USER: "{{ generate_username }}"
@@ -29,7 +29,7 @@ x-zane-env:
   RABBITMQ_VHOST: plane
   API_BASE_URL: http://api:8000
   DEBUG: 0
-  CORS_ALLOWED_ORIGINS: http://$APP_DOMAIN # or https://$APP_DOMAIN
+  CORS_ALLOWED_ORIGINS: http://${APP_DOMAIN} # or https://${APP_DOMAIN}
   GUNICORN_WORKERS: 1
   USE_MINIO: 1
   DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@plane-db/plane
@@ -228,7 +228,7 @@ services:
     image: makeplane/plane-proxy:${APP_RELEASE:-v1.2.1}
     deploy:
       labels:
-        zane.http.routes.0.domain: $APP_DOMAIN
+        zane.http.routes.0.domain: ${APP_DOMAIN}
         zane.http.routes.0.port: 80
     environment:
       <<: *proxy-env

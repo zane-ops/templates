@@ -26,7 +26,7 @@ services:
     deploy:
       labels:
         zane.http.routes.0.port: 3000
-        zane.http.routes.0.domain: $GITEA_DOMAIN
+        zane.http.routes.0.domain: ${GITEA_DOMAIN}
 
   postgres:
     image: docker.io/library/postgres:14

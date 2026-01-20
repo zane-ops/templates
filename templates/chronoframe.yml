@@ -14,11 +14,11 @@ services:
       - chronoframe-data:/app/data
     environment:
       # Admin email (required)
-      - CFRAME_ADMIN_EMAIL=$CFRAME_ADMIN_EMAIL
+      - CFRAME_ADMIN_EMAIL=${CFRAME_ADMIN_EMAIL}
       # Admin username (optional, default Chronoframe)
-      - CFRAME_ADMIN_NAME=$CFRAME_ADMIN_NAME
+      - CFRAME_ADMIN_NAME=${CFRAME_ADMIN_NAME}
       # Admin password (optional, default CF1234@!)
-      - CFRAME_ADMIN_PASSWORD=$CFRAME_ADMIN_PASSWORD
+      - CFRAME_ADMIN_PASSWORD=${CFRAME_ADMIN_PASSWORD}
       # Allow access via HTTP: ONLY LOCALLY !!
       # - NUXT_ALLOW_INSECURE_COOKIE=true
       # Site metadata (all optional)
@@ -43,7 +43,7 @@ services:
       - NUXT_STORAGE_PROVIDER=local
       - NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
       # # Session password (32‑char random string, required)
-      - NUXT_SESSION_PASSWORD=$NUXT_SESSION_PASSWORD
+      - NUXT_SESSION_PASSWORD=${NUXT_SESSION_PASSWORD}
       # Storage provider (s3)
       # - NUXT_STORAGE_PROVIDER=s3
       # - NUXT_PROVIDER_S3_ENDPOINT
@@ -54,6 +54,6 @@ services:
     deploy:
       labels:
         zane.http.routes.0.port: 3000
-        zane.http.routes.0.domain: $CF_DOMAIN
+        zane.http.routes.0.domain: ${CF_DOMAIN}
 volumes:
   chronoframe-data:
