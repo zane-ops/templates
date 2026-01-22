@@ -2087,16 +2087,37 @@ services:
 
 ## Best Practices
 
-### 1. Always Use `network_alias` for Service Communication
+### 1. Use the Right Hostname for Service Communication
+
+**Within the same stack**: Use the service name directly (simpler and works via the stack's default network).
 
 ```yaml
-# ✅ Recommended
+# ✅ Recommended for same-stack communication
+services:
+  app:
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+```
+
+**Across different stacks in the same environment**: Use `network_alias` for stable, environment-scoped DNS.
+
+```yaml
+# ✅ Recommended for cross-stack communication (same environment)
 x-zane-env:
   DB_HOST: "{{ network_alias | 'postgres' }}"
   REDIS_HOST: "{{ network_alias | 'redis' }}"
 ```
 
-**Why**: Stable across deployments and PR preview environments.
+**Across different environments or globally in ZaneOps**: Use `global_alias` for globally unique DNS.
+
+```yaml
+# ✅ Recommended for cross-environment communication
+x-zane-env:
+  SHARED_DB: "{{ global_alias | 'postgres' }}"
+```
+
+**Why**: Service names are simplest for intra-stack communication. `network_alias` provides stable DNS for cross-stack scenarios within the same environment. `global_alias` is needed when communicating across environments or projects.
 
 ---
 
