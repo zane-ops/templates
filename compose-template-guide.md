@@ -164,6 +164,8 @@ x-zane-env:
   ANOTHER_VAR: "{{ template_function | argument }}"
 ```
 
+**Important**: Variables defined in `x-zane-env` must be referenced using `${VAR_NAME}` syntax (with curly braces) to be interpolated in services, configs, and other parts of the compose file. Without the braces, the variable will not be expanded.
+
 ### Available Template Functions
 
 #### 1. `generate_username`
