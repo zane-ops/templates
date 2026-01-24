@@ -32,7 +32,7 @@ services:
       POSTGRES_DB: ${PG_DB}
     expose:
       - 5432
-  redis:
+  authentik-redis:
     image: docker.io/library/redis:alpine
     command: --save 60 1 --loglevel warning
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
     volumes:
       - type: volume
         target: /data
-        source: redis
+        source: redis-data
     expose:
       - 6379
   server:
@@ -55,7 +55,7 @@ services:
     command: server
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
-      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_REDIS__HOST: authentik-redis
       AUTHENTIK_POSTGRESQL__HOST: postgresql
       AUTHENTIK_POSTGRESQL__USER: ${PG_USER}
       AUTHENTIK_POSTGRESQL__NAME: ${PG_DB}
@@ -69,7 +69,7 @@ services:
         source: custom-templates
     depends_on:
       - postgresql
-      - redis
+      - authentik-redis
     deploy:
       labels:
         zane.http.routes.0.domain: ${main_domain}
@@ -86,7 +86,7 @@ services:
     command: worker
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
-      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_REDIS__HOST: authentik-redis
       AUTHENTIK_POSTGRESQL__HOST: postgresql
       AUTHENTIK_POSTGRESQL__USER: ${PG_USER}
       AUTHENTIK_POSTGRESQL__NAME: ${PG_DB}
@@ -107,11 +107,11 @@ services:
         source: custom-templates
     depends_on:
       - postgresql
-      - redis
+      - authentik-redis
 volumes:
   database:
     driver: local
-  redis:
+  redis-data:
     driver: local
   media:
     driver: local
