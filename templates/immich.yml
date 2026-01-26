@@ -101,7 +101,6 @@ services:
         "-c",
         "wal_compression=on",
       ]
-    restart: always
 
 volumes:
   immich-model-cache:
