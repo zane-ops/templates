@@ -11,7 +11,7 @@ x-zane-env:
   REDIS_PORT: 6379
   REDIS_DBINDEX: 0
   TZ: UTC
-  IMMICH_VERSION: v2.4.1
+  IMMICH_VERSION: v2
 
 services:
   immich-server:
@@ -60,7 +60,7 @@ services:
       REDIS_DBINDEX: ${REDIS_DBINDEX}
 
   immich-redis:
-    image: redis:6.2-alpine
+    image: docker.io/valkey/valkey:9
 
     volumes:
       - immich-redis-data:/data
@@ -71,7 +71,7 @@ services:
       retries: 5
 
   immich-database:
-    image: tensorchord/pgvecto-rs:pg14-v0.3.0
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
 
     volumes:
       - immich-postgres:/var/lib/postgresql/data
@@ -85,22 +85,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    command:
-      [
-        "postgres",
-        "-c",
-        "shared_preload_libraries=vectors.so",
-        "-c",
-        'search_path="$$user", public, vectors',
-        "-c",
-        "logging_collector=on",
-        "-c",
-        "max_wal_size=2GB",
-        "-c",
-        "shared_buffers=512MB",
-        "-c",
-        "wal_compression=on",
-      ]
 
 volumes:
   immich-model-cache:
