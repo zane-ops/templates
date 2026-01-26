@@ -8,10 +8,15 @@ services:
         target: /etc/caddy/Caddyfile
       - source: index.html
         target: /srv/index.html
+    volumes:
+      - caddy-data:/data
     deploy:
       labels:
         zane.http.routes.0.port: 80
         zane.http.routes.0.domain: ${DOMAIN}
+
+volumes:
+  caddy-data:
 
 configs:
   caddyfile:
