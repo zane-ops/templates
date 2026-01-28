@@ -11,7 +11,7 @@ x-zane-env:
   REDIS_PORT: 6379
   REDIS_DBINDEX: 0
   TZ: UTC
-  IMMICH_VERSION: v2.4.1
+  IMMICH_VERSION: v2.5.0
 
 services:
   immich-server:
