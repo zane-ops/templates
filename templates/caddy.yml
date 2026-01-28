@@ -24,6 +24,7 @@ configs:
       :80 {
         root * /srv
         file_server
+        log
       }
   index.html:
     content: |
