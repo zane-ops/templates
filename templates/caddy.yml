@@ -1,8 +1,9 @@
 x-zane-env:
   DOMAIN: "{{ generate_domain }}"
+  IMAGE_VERSION: 2-alpine
 services:
   caddy:
-    image: caddy:2-alpine
+    image: caddy:${IMAGE_VERSION:-alpine}
     configs:
       - source: caddyfile
         target: /etc/caddy/Caddyfile
