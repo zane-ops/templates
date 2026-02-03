@@ -5,8 +5,7 @@ x-zane-env:
   POSTGRES_USER: "umami"
   POSTGRES_PASSWORD: "{{ generate_password | 16 }}"
   POSTGRES_DB: "umami"
-  DB_SERVICE_ALIAS: "{{ network_alias | 'db' }}"
-  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_SERVICE_ALIAS}:5432/${POSTGRES_DB}
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
   UMAMI_VERSION: 3.0.3
 
 services:
