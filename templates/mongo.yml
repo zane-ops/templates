@@ -1,0 +1,30 @@
+x-zane-env:
+  MONGO_ROOT_USERNAME: "{{ generate_slug }}"
+  MONGO_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+  MONGO_DATABASE: "{{ generate_slug }}"
+  MONGO_VERSION: "8-noble"
+  DB_HOST_ENV_NAME: "{{ network_alias | 'mongo' }}"
+  DB_HOST_GLOBAL_NAME: "{{ global_alias | 'mongo' }}"
+  __MONGO_URL: "mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@${DB_HOST_ENV_NAME}:27017/${MONGO_DATABASE}?authSource=admin"
+  __MONGO_URL_GLOBAL: "mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@${DB_HOST_GLOBAL_NAME}:27017/${MONGO_DATABASE}?authSource=admin"
+
+services:
+  mongo:
+    image: docker.io/library/mongo:${MONGO_VERSION:-8-noble}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+
+volumes:
+  data:
+    driver: local
