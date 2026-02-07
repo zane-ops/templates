@@ -14,23 +14,24 @@ ZaneOps is a platform for deploying and managing containerized applications. The
 
 ## Available Templates
 
-| Template                           | Description                            | Stack                         |
-| ---------------------------------- | -------------------------------------- | ----------------------------- |
-| [authentik.yml](authentik.yml)     | Identity provider and SSO solution     | PostgreSQL, Redis             |
-| [caddy.yml](caddy.yml)             | Modern reverse proxy and web server    | Standalone                    |
-| [chronoframe.yml](chronoframe.yml) | Time tracking application              | Redis                         |
-| [gitea.yml](gitea.yml)             | Self-hosted Git service                | PostgreSQL                    |
-| [grafana.yml](grafana.yml)         | Monitoring and visualization platform  | Standalone                    |
-| [immich.yml](immich.yml)           | Self-hosted photo and video management | PostgreSQL, Redis, ML         |
-| [n8n.yml](n8n.yml)                 | Workflow automation platform           | PostgreSQL                    |
-| [openpanel.yml](openpanel.yml)     | Open-source analytics platform         | PostgreSQL, Redis, ClickHouse |
-| [penpot.yml](penpot.yml)           | Open-source design and prototyping     | Multiple services             |
-| [pocketbase.yml](pocketbase.yml)   | Backend-as-a-Service in one file       | SQLite (embedded)             |
-| [postgres.yml](postgres.yml)       | PostgreSQL database server             | Standalone                    |
-| [rustfs.yml](rustfs.yml)           | Rust-based file system service         | Standalone                    |
-| [rybbit.yml](rybbit.yml)           | Analytics and tracking platform        | PostgreSQL, ClickHouse        |
-| [typesense.yml](typesense.yml)     | Fast, typo-tolerant search engine      | Standalone                    |
-| [valkey.yml](valkey.yml)           | Redis-compatible key-value store       | Standalone                    |
+| Template                                       | Description                            | Stack                         |
+| ---------------------------------------------- | -------------------------------------- | ----------------------------- |
+| [authentik.yml](./templates/authentik.yml)     | Identity provider and SSO solution     | PostgreSQL, Redis             |
+| [caddy.yml](./templates/caddy.yml)             | Modern reverse proxy and web server    | Standalone                    |
+| [chronoframe.yml](./templates/chronoframe.yml) | Time tracking application              | Redis                         |
+| [gitea.yml](./templates/gitea.yml)             | Self-hosted Git service                | PostgreSQL                    |
+| [grafana.yml](./templates/grafana.yml)         | Monitoring and visualization platform  | Standalone                    |
+| [immich.yml](./templates/immich.yml)           | Self-hosted photo and video management | PostgreSQL, Redis, ML         |
+| [n8n.yml](./templates/n8n.yml)                 | Workflow automation platform           | PostgreSQL                    |
+| [openpanel.yml](./templates/openpanel.yml)     | Open-source analytics platform         | PostgreSQL, Redis, ClickHouse |
+| [penpot.yml](./templates/penpot.yml)           | Open-source design and prototyping     | Multiple services             |
+| [pocketbase.yml](./templates/pocketbase.yml)   | Backend-as-a-Service in one file       | SQLite (embedded)             |
+| [postgres.yml](./templates/postgres.yml)       | PostgreSQL database server             | Standalone                    |
+| [rustfs.yml](./templates/rustfs.yml)           | Rust-based file system service         | Standalone                    |
+| [rybbit.yml](./templates/rybbit.yml)           | Analytics and tracking platform        | PostgreSQL, ClickHouse        |
+| [typesense.yml](./templates/typesense.yml)     | Fast, typo-tolerant search engine      | Standalone                    |
+| [valkey.yml](./templates/valkey.yml)           | Redis-compatible key-value store       | Standalone                    |
+| [And more](./templates/)                       | More templates                         |                               |
 
 ## Quick Start: Creating a Template
 
@@ -81,15 +82,15 @@ volumes:
 
 Define in `x-zane-env`, reference with `${VAR}`:
 
-| Expression | Output |
-|------------|--------|
-| `{{ generate_domain }}` | Auto-generated subdomain |
-| `{{ generate_password \| 32 }}` | 32-char hex password |
-| `{{ generate_username }}` | Random username (e.g., `reddog65`) |
-| `{{ generate_slug }}` | URL-friendly slug (e.g., `happy-tree-91`) |
-| `{{ generate_uuid }}` | UUID v4 |
-| `{{ generate_email }}` | Generated email address |
-| `{{ network_alias \| 'service' }}` | Stable service hostname |
+| Expression                         | Output                                    |
+| ---------------------------------- | ----------------------------------------- |
+| `{{ generate_domain }}`            | Auto-generated subdomain                  |
+| `{{ generate_password \| 32 }}`    | 32-char hex password                      |
+| `{{ generate_username }}`          | Random username (e.g., `reddog65`)        |
+| `{{ generate_slug }}`              | URL-friendly slug (e.g., `happy-tree-91`) |
+| `{{ generate_uuid }}`              | UUID v4                                   |
+| `{{ generate_email }}`             | Generated email address                   |
+| `{{ network_alias \| 'service' }}` | Stable service hostname                   |
 
 ### Routing Labels
 
@@ -154,16 +155,16 @@ python deploy_compose.py -f grafana.yml -p my-project -e production -u https://z
 
 **Options:**
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-f, --file` | Path to compose YAML file | Required |
-| `-p, --project` | Project slug | `compose` |
-| `-e, --env` | Environment slug | `production` |
-| `-s, --slug` | Stack slug | Filename without extension |
-| `-u, --base-url` | ZaneOps API URL | `http://localhost:8000` |
-| `--username` | Login username | `admin` |
-| `--password` | Login password | `password` |
-| `-m, --message` | Deployment commit message | `Deploy from CLI` |
+| Flag             | Description               | Default                    |
+| ---------------- | ------------------------- | -------------------------- |
+| `-f, --file`     | Path to compose YAML file | Required                   |
+| `-p, --project`  | Project slug              | `compose`                  |
+| `-e, --env`      | Environment slug          | `production`               |
+| `-s, --slug`     | Stack slug                | Filename without extension |
+| `-u, --base-url` | ZaneOps API URL           | `http://localhost:8000`    |
+| `--username`     | Login username            | `admin`                    |
+| `--password`     | Login password            | `password`                 |
+| `-m, --message`  | Deployment commit message | `Deploy from CLI`          |
 
 **Environment Variables:** Copy `.env.example` to `.env` to preload default values for `BASE_URL`, `PROJECT_SLUG`, `ENV_SLUG`, `USERNAME`, and `PASSWORD`. Command-line flags override `.env` values.
 
