@@ -1,0 +1,158 @@
+x-zane-env:
+  SOLIDTIME_IMAGE_TAG: latest
+  main_domain: "{{ generate_domain }}"
+  mail_domain: "{{ generate_domain }}"
+  DB_DATABASE: solidtime
+  DB_USERNAME: solidtime
+  DB_PASSWORD: "{{ generate_password | 32 }}"
+  APP_KEY: "{{ generate_password | 32 }}"
+
+x-laravel-env: &x-common
+  APP_NAME: "solidtime"
+  VITE_APP_NAME: "solidtime"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "http://${main_domain}"
+  APP_FORCE_HTTPS: "false"
+
+  # Authentication
+  APP_KEY: ${APP_KEY}
+
+  # Generate these keys by connecting to the terminal of the `scheduler` service
+  # and running `php artisan self-host:generate-keys`
+
+  # PASSPORT_PRIVATE_KEY: |
+  #   -----BEGIN PRIVATE KEY-----
+  #   # ... need to generate this
+  #   -----END PRIVATE KEY-----
+  # PASSPORT_PUBLIC_KEY: |
+  #   -----BEGIN PUBLIC KEY-----
+  #   # ... need to generate this
+  #   -----END PUBLIC KEY-----
+  SUPER_ADMINS: ""
+  # Logging
+  LOG_CHANNEL: "stderr_daily"
+  LOG_LEVEL: "debug"
+
+  # Database
+  DB_CONNECTION: "pgsql"
+  DB_HOST: "database"
+  DB_PORT: "5432"
+  DB_DATABASE: "solidtime"
+  DB_USERNAME: "solidtime"
+  DB_PASSWORD: "${DB_PASSWORD}"
+
+  # Mail (using `malpit` for local testing, change this in production)
+  MAIL_MAILER: "smtp"
+  MAIL_HOST: "mail"
+  MAIL_PORT: "1025"
+  MAIL_ENCRYPTION: "tls"
+  MAIL_FROM_ADDRESS: "no-reply@your-domain.com"
+  MAIL_FROM_NAME: "solidtime"
+  MAIL_USERNAME: ""
+  MAIL_PASSWORD: ""
+
+  # Queue
+  QUEUE_CONNECTION: "database"
+
+  # File storage
+  FILESYSTEM_DISK: "local"
+  PUBLIC_FILESYSTEM_DISK: "public"
+
+  # Services
+  GOTENBERG_URL: "http://gotenberg:3000"
+
+  # registration
+  APP_ENABLE_REGISTRATION: "true"
+  AUTO_DB_MIGRATE: "true"
+
+services:
+  app:
+    restart: always
+    image: "solidtime/solidtime:${SOLIDTIME_IMAGE_TAG:-latest}"
+    user: "1000:1000"
+    volumes:
+      - "app-storage:/var/www/html/storage"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/health-check/up"]
+    environment:
+      CONTAINER_MODE: http
+      <<: *x-common
+    depends_on:
+      - database
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.port: 8000
+  scheduler:
+    restart: always
+    image: "solidtime/solidtime:${SOLIDTIME_IMAGE_TAG:-latest}"
+    user: "1000:1000"
+
+    volumes:
+      - "app-storage:/var/www/html/storage"
+
+    healthcheck:
+      test: ["CMD", "healthcheck"]
+    environment:
+      CONTAINER_MODE: scheduler
+      <<: *x-common
+    depends_on:
+      - database
+  queue:
+    restart: always
+    image: "solidtime/solidtime:${SOLIDTIME_IMAGE_TAG:-latest}"
+    user: "1000:1000"
+
+    volumes:
+      - "app-storage:/var/www/html/storage"
+
+    environment:
+      CONTAINER_MODE: worker
+      WORKER_COMMAND: "php /var/www/html/artisan queue:work"
+      <<: *x-common
+    healthcheck:
+      test: ["CMD", "healthcheck"]
+    depends_on:
+      - database
+  database:
+    restart: always
+    image: "postgres:15-alpine"
+    environment:
+      PGPASSWORD: "${DB_PASSWORD:-secret}"
+      POSTGRES_DB: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - "database-storage:/var/lib/postgresql/data"
+
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - "-q"
+        - "-d"
+        - "$$DB_DATABASE"
+        - "-U"
+        - "$$DB_USERNAME"
+      retries: 3
+      timeout: 5s
+  mail:
+    image: axllent/mailpit
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${mail_domain}
+        zane.http.routes.0.port: 8025
+    volumes:
+      - mailpit-storage:/data
+    environment:
+      - MP_DATABASE=/data/mailpit.db
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    healthcheck:
+      test:
+        ["CMD", "curl", "--silent", "--fail", "http://localhost:3000/health"]
+volumes:
+  database-storage:
+  app-storage:
+  mailpit-storage:
