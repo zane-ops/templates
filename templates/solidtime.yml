@@ -13,7 +13,7 @@ x-laravel-env: &x-common
   APP_ENV: "production"
   APP_DEBUG: "false"
   APP_URL: "http://${main_domain}"
-  APP_FORCE_HTTPS: "false"
+  APP_FORCE_HTTPS: "false" # set to `true` in production
 
   # Authentication
   APP_KEY: ${APP_KEY}
