@@ -1,0 +1,64 @@
+x-zane-env:
+  POSTGRES_PASSWORD: "{{ generate_password | 32 }}"
+  CALCOM_HOST: "{{ generate_domain }}"
+  studio_domain: "{{ generate_domain }}"
+  POSTGRES_USER: unicorn_user
+  POSTGRES_DB: calendso
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database/${POSTGRES_DB}
+  NEXTAUTH_SECRET: "{{ generate_password | 32 }}"
+  CALENDSO_ENCRYPTION_KEY: "{{ generate_password | 32 }}"
+
+services:
+  database:
+    image: postgres
+    volumes:
+      - database-data:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+  redis:
+    image: redis:latest
+    volumes:
+      - redis-data:/data
+
+  calcom:
+    image: calcom.docker.scarf.sh/calcom/cal.com
+    networks:
+      - stack
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_DIRECT_URL=${DATABASE_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - CALENDSO_ENCRYPTION_KEY=${CALENDSO_ENCRYPTION_KEY}
+      - NEXT_PUBLIC_WEBAPP_URL=http://${CALCOM_HOST}
+      - NEXTAUTH_URL=http://${CALCOM_HOST}/api/auth
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${CALCOM_HOST}
+        zane.http.routes.0.port: 3000
+    depends_on:
+      - database
+
+  # Optional use of Prisma Studio. In production, comment out or remove the section below to prevent unwanted access to your database.
+  # studio:
+  #   image: calcom.docker.scarf.sh/calcom/cal.com
+  #   environment:
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - DATABASE_DIRECT_URL=${DATABASE_URL}
+  #   depends_on:
+  #     - database
+  #   deploy:
+  #     labels:
+  #       zane.http.routes.0.domain: ${studio_domain}
+  #       zane.http.routes.0.port: 5555
+  #   command:
+  #     - npx
+  #     - prisma
+  #     - studio
+  # END SECTION: Optional use of Prisma Studio.
+  # Use postgres/example user/password credentials
+
+volumes:
+  database-data:
+  redis-data:
