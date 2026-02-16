@@ -80,12 +80,13 @@ services:
       - NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS=${NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS}
       - DOCUMENSO_DISABLE_TELEMETRY=true
       - NEXT_PRIVATE_SIGNING_PASSPHRASE=${CERT_PASS}
+      - CERT_PASS=${CERT_PASS}
     deploy:
       labels:
         zane.http.routes.0.domain: ${main_domain}
         zane.http.routes.0.port: ${PORT:-3000}
-    # volumes:
-    #   - /opt/documenso/cert.p12:/opt/documenso/cert.p12:ro
+    volumes:
+      - documenso-certificates:/app/certs
   mailer:
     image: axllent/mailpit
     deploy:
@@ -98,4 +99,5 @@ services:
       - MP_DATABASE=/data/mailpit.db
 volumes:
   database:
+  documenso-certificates:
   mailpit-storage:
