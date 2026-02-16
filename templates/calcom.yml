@@ -8,6 +8,7 @@ x-zane-env:
   NEXTAUTH_SECRET: "{{ generate_password | 32 }}"
   CALENDSO_ENCRYPTION_KEY: "{{ generate_password | 32 }}"
   SCHEME: https # or http
+  IMAGE_VERSION: v6.1.16 # or `v6.1.16-arm` if you are on an ARM machine
 
 services:
   database:
@@ -24,9 +25,7 @@ services:
       - redis-data:/data
 
   calcom:
-    image: calcom.docker.scarf.sh/calcom/cal.com
-    networks:
-      - stack
+    image: calcom/cal.com:${IMAGE_VERSION}
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DATABASE_DIRECT_URL=${DATABASE_URL}
@@ -43,7 +42,7 @@ services:
 
   # Optional use of Prisma Studio. In production, comment out or remove the section below to prevent unwanted access to your database.
   # studio:
-  #   image: calcom.docker.scarf.sh/calcom/cal.com
+  #   image: calcom/cal.com:${IMAGE_VERSION}
   #   environment:
   #     - DATABASE_URL=${DATABASE_URL}
   #     - DATABASE_DIRECT_URL=${DATABASE_URL}
