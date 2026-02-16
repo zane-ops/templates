@@ -1,9 +1,10 @@
 x-zane-env:
   main_domain: "{{ generate_domain }}"
+  IMAGE_VERSION: "2.38.1-alpine"
 
 services:
   portainer:
-    image: portainer/portainer-ce:latest
+    image: portainer/portainer-ce:${IMAGE_VERSION}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer-data:/data
