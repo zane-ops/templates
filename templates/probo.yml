@@ -1,0 +1,136 @@
+x-zane-env:
+  PROBOD_ENCRYPTION_KEY: "{{ generate_password | 44 }}"
+  AUTH_COOKIE_SECRET: "{{ generate_password | 32 }}"
+  AUTH_PASSWORD_PEPPER: "{{ generate_password | 32 }}"
+  TRUST_AUTH_TOKEN_SECRET: "{{ generate_password | 32 }}"
+  probo_domain: "{{ generate_domain }}"
+  mailer_domain: "{{ generate_domain }}"
+  PG_USERNAME: "{{ generate_username }}"
+  PG_PASSWORD: "{{ generate_password | 32 }}"
+  MINIO_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+
+services:
+  probo:
+    image: "ghcr.io/getprobo/probo:latest"
+    environment:
+      # Required secrets (use secure values in production)
+      PROBOD_ENCRYPTION_KEY: "${PROBOD_ENCRYPTION_KEY}"
+      AUTH_COOKIE_SECRET: "${AUTH_COOKIE_SECRET}"
+      AUTH_PASSWORD_PEPPER: "${AUTH_PASSWORD_PEPPER}"
+      TRUST_AUTH_TOKEN_SECRET: "${TRUST_AUTH_TOKEN_SECRET}"
+
+      # Application settings
+      PROBOD_BASE_URL: "http://${probo_domain}"
+      API_ADDR: "${probo_domain}"
+      API_CORS_ALLOWED_ORIGINS: "http://${probo_domain}"
+
+      # PostgreSQL database
+      PG_ADDR: "postgres:5432"
+      PG_USERNAME: "${PG_USERNAME}"
+      PG_PASSWORD: "${PG_PASSWORD}"
+      PG_DATABASE: "probod"
+      PG_POOL_SIZE: "100"
+
+      # AWS/MinIO S3 storage
+      AWS_REGION: "us-east-1"
+      AWS_BUCKET: "probod"
+      AWS_ACCESS_KEY_ID: "probod"
+      AWS_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
+      AWS_ENDPOINT: "http://minio:9000"
+
+      # Observability - Metrics & Tracing
+      METRICS_ADDR: "probo:8081"
+      TRACING_ADDR: ""
+
+      # Email notifications
+      SMTP_ADDR: "mailer:1025"
+      SMTP_TLS_REQUIRED: "false"
+      MAILER_SENDER_NAME: "Probo"
+      MAILER_SENDER_EMAIL: "no-reply@notification.getprobo.com"
+
+      # Chrome for PDF generation
+      CHROME_DP_ADDR: "chrome:9222"
+    # ports:
+    #   - "8080:8080"
+    #   - "8081:8081"
+    #   - "8443:8443"
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${probo_domain}
+        zane.http.routes.0.port: 8080
+    volumes:
+      - probo-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      chrome:
+        condition: service_started
+
+  postgres:
+    image: "postgres:17.4"
+    shm_size: "1g"
+    command: >
+      postgres -c "shared_buffers=4GB"
+               -c "max_connections=200"
+               -c "log_statement=all"
+    volumes:
+      # - "./compose/postgres:/docker-entrypoint-initdb.d:ro"
+      - "postgres-data:/var/lib/postgresql/data:rw"
+    environment:
+      POSTGRES_USER: "${PG_USERNAME}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD}"
+      POSTGRES_DB: probod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: "quay.io/minio/minio"
+    entrypoint: "sh"
+    command: |
+      -c 'mkdir -p /var/lib/minio/probod && minio server --json --console-address :9001 /var/lib/minio'
+    # ports:
+    #   - "9000:9000"
+    #   - "9001:9001"
+    volumes:
+      - "minio-data:/var/lib/minio:rw"
+    environment:
+      MINIO_ROOT_USER: "probod"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+
+  chrome:
+    image: "chromedp/headless-shell:140.0.7259.2"
+    # ports:
+    #   - "9222:9222"
+    command:
+      - "--headless"
+      - "--disable-gpu"
+      - "--disable-dev-shm-usage"
+      - "--hide-scrollbars"
+      - "--mute-audio"
+      - "--no-default-browser-check"
+      - "--no-first-run"
+      - "--disable-background-networking"
+      - "--disable-background-timer-throttling"
+      - "--disable-extensions"
+
+  mailer:
+    image: axllent/mailpit
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${mailer_domain}
+        zane.http.routes.0.port: 8025
+    volumes:
+      - mailpit-storage:/data
+    environment:
+      - MP_DATABASE=/data/mailpit.db
+
+volumes:
+  probo-data:
+  postgres-data:
+  minio-data:
+  mailpit-storage:
