@@ -9,8 +9,8 @@ x-zane-env:
 
   OPENPANEL_VERSION: 2.0.1-rc
 
-  DASHBOARD_URL: "http://${main_domain}"
-  API_URL: "http://${main_domain}/api"
+  DASHBOARD_URL: "https://${main_domain}" # or "http://${main_domain}"
+  API_URL: "https://${main_domain}/api" # or "http://${main_domain}/api"
 
   # Database configuration
   POSTGRES_DB: "openpanel"

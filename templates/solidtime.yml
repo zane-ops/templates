@@ -12,7 +12,7 @@ x-laravel-env: &x-common
   VITE_APP_NAME: "solidtime"
   APP_ENV: "production"
   APP_DEBUG: "false"
-  APP_URL: "http://${main_domain}"
+  APP_URL: "https://${main_domain}" # or "http://${main_domain}"
   APP_FORCE_HTTPS: "false" # set to `true` in production
 
   # Authentication

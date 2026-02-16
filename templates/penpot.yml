@@ -1,6 +1,8 @@
 x-zane-env:
   main_domain: "{{ generate_domain }}"
   DOMAIN_NAME: ${main_domain}
+  SCHEME: https # or http in local
+
 services:
   penpot-frontend:
     image: penpotapp/frontend:2.6.1
@@ -31,7 +33,7 @@ services:
       - penpot-postgres
       - penpot-redis
     environment:
-      PENPOT_PUBLIC_URI: http://${DOMAIN_NAME}
+      PENPOT_PUBLIC_URI: ${SCHEME}://${DOMAIN_NAME}
       PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies
       PENPOT_DATABASE_URI: postgresql://penpot-postgres/penpot
       PENPOT_DATABASE_USERNAME: penpot

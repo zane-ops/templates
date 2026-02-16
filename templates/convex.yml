@@ -2,9 +2,9 @@ x-zane-env:
   dashboard_domain: "{{ generate_domain }}"
   backend_domain: "{{ generate_domain }}"
   actions_domain: "{{ generate_domain }}"
-  NEXT_PUBLIC_DEPLOYMENT_URL: http://${backend_domain}
-  CONVEX_CLOUD_ORIGIN: http://${backend_domain}
-  CONVEX_SITE_ORIGIN: http://${actions_domain}
+  NEXT_PUBLIC_DEPLOYMENT_URL: https://${backend_domain} # or http://${backend_domain}
+  CONVEX_CLOUD_ORIGIN: https://${backend_domain} # or http://${backend_domain}
+  CONVEX_SITE_ORIGIN: https://${actions_domain} # or http://${actions_domain}
   INSTANCE_NAME: "{{ generate_slug }}"
 
 services:

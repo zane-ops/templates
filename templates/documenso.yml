@@ -8,7 +8,7 @@ x-zane-env:
   DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database/${POSTGRES_DB}
   NEXT_PRIVATE_ENCRYPTION_KEY: "{{ generate_password | 32 }}"
   NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY: "{{ generate_password | 32 }}"
-  NEXT_PUBLIC_WEBAPP_URL: "http://${main_domain}"
+  NEXT_PUBLIC_WEBAPP_URL: "https://${main_domain}" # or "http://${main_domain}"
   NEXT_PRIVATE_SMTP_TRANSPORT: "smtp-auth"
   NEXT_PRIVATE_SMTP_HOST: "mailer"
   NEXT_PRIVATE_SMTP_PORT: 1025

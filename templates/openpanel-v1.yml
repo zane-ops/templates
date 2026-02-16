@@ -3,8 +3,8 @@ x-zane-env:
   db_password: "{{ generate_password | 32 }}"
   cookie_secret: "{{ generate_password | 32 }}"
   redis_password: "{{ generate_password | 32 }}"
-  SERVICE_FQDN_OPDASHBOARD: http://${main_domain}
-  SERVICE_FQDN_OPAPI: http://${main_domain}/api
+  SERVICE_FQDN_OPDASHBOARD: https://${main_domain} # or http://${main_domain}
+  SERVICE_FQDN_OPAPI: https://${main_domain}/api # or http://${main_domain}/api
   OPENPANEL_POSTGRES_DB: openpanel-db
   SERVICE_USER_POSTGRES: openpanel
   SERVICE_PASSWORD_POSTGRES: ${db_password}
