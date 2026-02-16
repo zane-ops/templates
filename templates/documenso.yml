@@ -12,6 +12,8 @@ x-zane-env:
   NEXT_PRIVATE_SMTP_TRANSPORT: "smtp-auth"
   NEXT_PRIVATE_SMTP_HOST: "mailer"
   NEXT_PRIVATE_SMTP_PORT: 1025
+  IMAGE_VERSION: v2.6.0
+  CERT_PASS: "{{ generate_password | 32 }}"
   # NEXT_PRIVATE_SMTP_USERNAME: "<your-username>"
   # NEXT_PRIVATE_SMTP_PASSWORD: "<your-password>"
 
@@ -31,18 +33,18 @@ services:
       - database:/var/lib/postgresql/data
 
   documenso:
-    image: documenso/documenso:latest
+    image: documenso/documenso:${IMAGE_VERSION}
     depends_on:
       - database
     environment:
       - PORT=${PORT:-3000}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?err}
-      - NEXT_PRIVATE_ENCRYPTION_KEY=${NEXT_PRIVATE_ENCRYPTION_KEY:?err}
-      - NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY=${NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY:?err}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXT_PRIVATE_ENCRYPTION_KEY=${NEXT_PRIVATE_ENCRYPTION_KEY}
+      - NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY=${NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY}
       - NEXT_PRIVATE_GOOGLE_CLIENT_ID=${NEXT_PRIVATE_GOOGLE_CLIENT_ID}
       - NEXT_PRIVATE_GOOGLE_CLIENT_SECRET=${NEXT_PRIVATE_GOOGLE_CLIENT_SECRET}
-      - NEXT_PUBLIC_WEBAPP_URL=${NEXT_PUBLIC_WEBAPP_URL:?err}
-      - NEXT_PRIVATE_INTERNAL_WEBAPP_URL=${NEXT_PRIVATE_INTERNAL_WEBAPP_URL:-http://localhost:$PORT}
+      - NEXT_PUBLIC_WEBAPP_URL=${NEXT_PUBLIC_WEBAPP_URL}
+      - NEXT_PRIVATE_INTERNAL_WEBAPP_URL=${NEXT_PRIVATE_INTERNAL_WEBAPP_URL:-http://localhost:${PORT:-3000}}
       - NEXT_PRIVATE_DATABASE_URL=${DATABASE_URL}
       - NEXT_PRIVATE_DIRECT_DATABASE_URL=${NEXT_PRIVATE_DIRECT_DATABASE_URL:-${DATABASE_URL}}
       - NEXT_PUBLIC_UPLOAD_TRANSPORT=${NEXT_PUBLIC_UPLOAD_TRANSPORT:-database}
@@ -52,7 +54,7 @@ services:
       - NEXT_PRIVATE_UPLOAD_BUCKET=${NEXT_PRIVATE_UPLOAD_BUCKET}
       - NEXT_PRIVATE_UPLOAD_ACCESS_KEY_ID=${NEXT_PRIVATE_UPLOAD_ACCESS_KEY_ID}
       - NEXT_PRIVATE_UPLOAD_SECRET_ACCESS_KEY=${NEXT_PRIVATE_UPLOAD_SECRET_ACCESS_KEY}
-      - NEXT_PRIVATE_SMTP_TRANSPORT=${NEXT_PRIVATE_SMTP_TRANSPORT:?err}
+      - NEXT_PRIVATE_SMTP_TRANSPORT=${NEXT_PRIVATE_SMTP_TRANSPORT}
       - NEXT_PRIVATE_SMTP_HOST=${NEXT_PRIVATE_SMTP_HOST}
       - NEXT_PRIVATE_SMTP_PORT=${NEXT_PRIVATE_SMTP_PORT}
       - NEXT_PRIVATE_SMTP_USERNAME=${NEXT_PRIVATE_SMTP_USERNAME}
@@ -61,8 +63,8 @@ services:
       - NEXT_PRIVATE_SMTP_APIKEY=${NEXT_PRIVATE_SMTP_APIKEY}
       - NEXT_PRIVATE_SMTP_SECURE=${NEXT_PRIVATE_SMTP_SECURE}
       - NEXT_PRIVATE_SMTP_UNSAFE_IGNORE_TLS=${NEXT_PRIVATE_SMTP_UNSAFE_IGNORE_TLS}
-      - NEXT_PRIVATE_SMTP_FROM_NAME=${NEXT_PRIVATE_SMTP_FROM_NAME:?err}
-      - NEXT_PRIVATE_SMTP_FROM_ADDRESS=${NEXT_PRIVATE_SMTP_FROM_ADDRESS:?err}
+      - NEXT_PRIVATE_SMTP_FROM_NAME=${NEXT_PRIVATE_SMTP_FROM_NAME}
+      - NEXT_PRIVATE_SMTP_FROM_ADDRESS=${NEXT_PRIVATE_SMTP_FROM_ADDRESS}
       - NEXT_PRIVATE_SMTP_SERVICE=${NEXT_PRIVATE_SMTP_SERVICE}
       - NEXT_PRIVATE_RESEND_API_KEY=${NEXT_PRIVATE_RESEND_API_KEY}
       - NEXT_PRIVATE_MAILCHANNELS_API_KEY=${NEXT_PRIVATE_MAILCHANNELS_API_KEY}
@@ -76,22 +78,24 @@ services:
       - NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH=${NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH:-/opt/documenso/cert.p12}
       - NEXT_PRIVATE_SIGNING_PASSPHRASE=${NEXT_PRIVATE_SIGNING_PASSPHRASE}
       - NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS=${NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS}
+      - DOCUMENSO_DISABLE_TELEMETRY=true
+      - CERT_PASS=${CERT_PASS}
     deploy:
       labels:
         zane.http.routes.0.domain: ${main_domain}
-        zane.http.routes.0.port: 3000
+        zane.http.routes.0.port: ${PORT:-3000}
     # volumes:
     #   - /opt/documenso/cert.p12:/opt/documenso/cert.p12:ro
-    mail:
-      image: axllent/mailpit
-      deploy:
-        labels:
-          zane.http.routes.0.domain: ${mail_domain}
-          zane.http.routes.0.port: 8025
-      volumes:
-        - mailpit-storage:/data
-      environment:
-        - MP_DATABASE=/data/mailpit.db
+  mailer:
+    image: axllent/mailpit
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${mail_domain}
+        zane.http.routes.0.port: 8025
+    volumes:
+      - mailpit-storage:/data
+    environment:
+      - MP_DATABASE=/data/mailpit.db
 volumes:
   database:
   mailpit-storage:
