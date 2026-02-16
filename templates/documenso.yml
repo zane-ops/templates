@@ -86,6 +86,8 @@ services:
         zane.http.routes.0.domain: ${main_domain}
         zane.http.routes.0.port: ${PORT:-3000}
     volumes:
+      # connect to the service terminal using `root` user
+      # and generate the certificate here: https://docs.documenso.com/developers/self-hosting/how-to#option-a-generate-certificate-inside-container-recommended
       - documenso-certificates:/app/certs
   mailer:
     image: axllent/mailpit
