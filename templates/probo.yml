@@ -1,8 +1,8 @@
 x-zane-env:
-  PROBOD_ENCRYPTION_KEY: "{{ generate_password | 44 }}"
-  AUTH_COOKIE_SECRET: "{{ generate_password | 32 }}"
-  AUTH_PASSWORD_PEPPER: "{{ generate_password | 32 }}"
-  TRUST_AUTH_TOKEN_SECRET: "{{ generate_password | 32 }}"
+  PROBOD_ENCRYPTION_KEY: "{{ generate_base64 | 32 }}"
+  AUTH_COOKIE_SECRET: "{{ generate_base64 | 32 }}"
+  AUTH_PASSWORD_PEPPER: "{{ generate_base64 | 32 }}"
+  TRUST_AUTH_TOKEN_SECRET: "{{ generate_base64 | 32 }}"
   probo_domain: "{{ generate_domain }}"
   mailer_domain: "{{ generate_domain }}"
   PG_USERNAME: "{{ generate_username }}"
@@ -21,7 +21,7 @@ services:
 
       # Application settings
       PROBOD_BASE_URL: "http://${probo_domain}"
-      API_ADDR: "${probo_domain}"
+      API_ADDR: "0.0.0.0:8080"
       API_CORS_ALLOWED_ORIGINS: "http://${probo_domain}"
 
       # PostgreSQL database
@@ -37,9 +37,10 @@ services:
       AWS_ACCESS_KEY_ID: "probod"
       AWS_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
       AWS_ENDPOINT: "http://minio:9000"
+      AWS_USE_PATH_STYLE: "true"
 
       # Observability - Metrics & Tracing
-      METRICS_ADDR: "probo:8081"
+      METRICS_ADDR: "localhost:8081"
       TRACING_ADDR: ""
 
       # Email notifications
@@ -50,10 +51,6 @@ services:
 
       # Chrome for PDF generation
       CHROME_DP_ADDR: "chrome:9222"
-    # ports:
-    #   - "8080:8080"
-    #   - "8081:8081"
-    #   - "8443:8443"
     deploy:
       labels:
         zane.http.routes.0.domain: ${probo_domain}
