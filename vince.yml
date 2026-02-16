@@ -1,0 +1,26 @@
+x-zane-env:
+  ADMIN_NAME: "admin"
+  ADMIN_PASSWORD: "{{ generate_password | 16 }}"
+  APP_DOMAIN: "{{ generate_domain }}"
+  IMAGE_VERSION: v1.11.8
+  SCHEME: https # or http
+
+services:
+  vince:
+    image: ghcr.io/vinceanalytics/vince:${IMAGE_VERSION}
+    restart: unless-stopped
+    command: |
+      serve --data /vince-data --profile
+    volumes:
+      - vince-data:/vince-data
+    environment:
+      VINCE_URL: ${SCHEME}://${APP_DOMAIN}
+      VINCE_ADMIN_NAME: ${ADMIN_NAME}
+      VINCE_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${APP_DOMAIN}
+        zane.http.routes.0.port: 8080
+
+volumes:
+  vince-data:
