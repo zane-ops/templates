@@ -29,7 +29,7 @@ x-zane-env:
   RABBITMQ_VHOST: plane
   API_BASE_URL: http://api:8000
   DEBUG: 0
-  CORS_ALLOWED_ORIGINS: http://${APP_DOMAIN} # or https://${APP_DOMAIN}
+  CORS_ALLOWED_ORIGINS: https://${APP_DOMAIN} # or http://${APP_DOMAIN}
   GUNICORN_WORKERS: 1
   USE_MINIO: 1
   DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@plane-db/plane
