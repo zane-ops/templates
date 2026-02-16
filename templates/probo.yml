@@ -8,6 +8,7 @@ x-zane-env:
   PG_USERNAME: "{{ generate_username }}"
   PG_PASSWORD: "{{ generate_password | 32 }}"
   MINIO_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+  SCHEME: https # or http in local
 
 services:
   probo:
@@ -20,9 +21,9 @@ services:
       TRUST_AUTH_TOKEN_SECRET: "${TRUST_AUTH_TOKEN_SECRET}"
 
       # Application settings
-      PROBOD_BASE_URL: "http://${probo_domain}"
+      PROBOD_BASE_URL: "${SCHEME}://${probo_domain}"
       API_ADDR: "0.0.0.0:8080"
-      API_CORS_ALLOWED_ORIGINS: "http://${probo_domain}"
+      API_CORS_ALLOWED_ORIGINS: "${SCHEME}://${probo_domain}"
 
       # PostgreSQL database
       PG_ADDR: "postgres:5432"
@@ -90,9 +91,6 @@ services:
     entrypoint: "sh"
     command: |
       -c 'mkdir -p /var/lib/minio/probod && minio server --json --console-address :9001 /var/lib/minio'
-    # ports:
-    #   - "9000:9000"
-    #   - "9001:9001"
     volumes:
       - "minio-data:/var/lib/minio:rw"
     environment:
@@ -101,8 +99,6 @@ services:
 
   chrome:
     image: "chromedp/headless-shell:140.0.7259.2"
-    # ports:
-    #   - "9222:9222"
     command:
       - "--headless"
       - "--disable-gpu"
