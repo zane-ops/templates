@@ -69,7 +69,6 @@ x-aws-s3-env: &aws-s3-env
 x-proxy-env: &proxy-env
   APP_DOMAIN: ${APP_DOMAIN:-localhost}
   FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-5242880}
-  LISTEN_HTTP_PORT: ${LISTEN_HTTP_PORT:-80}
   BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-uploads}
   SITE_ADDRESS: ${SITE_ADDRESS:-:80}
   API_DNS_NAME: ${API_DNS_NAME}
@@ -267,7 +266,7 @@ configs:
                   trusted_proxies static 0.0.0.0/0
           }
       }
-      {$LISTEN_HTTP_PORT} {
+      {$SITE_ADDRESS} {
               request_body {
                       max_size {$FILE_SIZE_LIMIT}
               }
