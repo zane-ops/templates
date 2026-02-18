@@ -1,6 +1,6 @@
 x-zane-env:
   APP_DOMAIN: "{{ generate_domain }}"
-  WEB_URL: http://${APP_DOMAIN} # or https://${APP_DOMAIN}
+  WEB_URL: https://${APP_DOMAIN} # or http://${APP_DOMAIN}
   PGHOST: plane-db
   PGDATABASE: plane
   POSTGRES_USER: "{{ generate_username }}"
