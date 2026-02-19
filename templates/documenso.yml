@@ -94,7 +94,8 @@ services:
       # openssl pkcs12 -export -out /app/certs/cert.p12 \
       #   -inkey /tmp/private.key -in /tmp/certificate.crt \
       #   -passout env:CERT_PASS && \
-      # rm /tmp/private.key /tmp/certificate.crt
+      # rm /tmp/private.key /tmp/certificate.crt \
+      # chown -R nodejs:nodejs /app/certs
       # more info in the docs: https://docs.documenso.com/developers/self-hosting/how-to#option-a-generate-certificate-inside-container-recommended
       - NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH=/app/certs/cert.p12
     deploy:
