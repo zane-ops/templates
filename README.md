@@ -2,6 +2,33 @@
 
 A curated collection of production-ready Docker Compose templates for deploying popular open-source applications on [ZaneOps](https://zaneops.dev).
 
+## Project Structure
+
+```
+.
+├── public/
+├── src/
+│   ├── assets/
+│   ├── content/
+│   │   └── docs/
+│   └── content.config.ts
+├── astro.config.mjs
+├── package.json
+└── tsconfig.json
+```
+
+Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build). Documentation lives in `src/content/docs/` as `.md` or `.mdx` files — each file is exposed as a route based on its file name.
+
+## Commands
+
+| Command               | Action                                           |
+| :-------------------- | :----------------------------------------------- |
+| `bun install`         | Installs dependencies                            |
+| `bun dev`             | Starts local dev server at `localhost:4321`      |
+| `bun build`           | Build your production site to `./dist/`          |
+| `bun preview`         | Preview your build locally, before deploying     |
+| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
+
 ## What is ZaneOps?
 
 ZaneOps is a platform for deploying and managing containerized applications. These templates are optimized for ZaneOps and include:
@@ -11,27 +38,6 @@ ZaneOps is a platform for deploying and managing containerized applications. The
 - Built-in health checks
 - Proper service dependencies
 - Data persistence with volumes
-
-## Available Templates
-
-| Template                                       | Description                            | Stack                         |
-| ---------------------------------------------- | -------------------------------------- | ----------------------------- |
-| [authentik.yml](./templates/authentik.yml)     | Identity provider and SSO solution     | PostgreSQL, Redis             |
-| [caddy.yml](./templates/caddy.yml)             | Modern reverse proxy and web server    | Standalone                    |
-| [chronoframe.yml](./templates/chronoframe.yml) | Time tracking application              | Redis                         |
-| [gitea.yml](./templates/gitea.yml)             | Self-hosted Git service                | PostgreSQL                    |
-| [grafana.yml](./templates/grafana.yml)         | Monitoring and visualization platform  | Standalone                    |
-| [immich.yml](./templates/immich.yml)           | Self-hosted photo and video management | PostgreSQL, Redis, ML         |
-| [n8n.yml](./templates/n8n.yml)                 | Workflow automation platform           | PostgreSQL                    |
-| [openpanel.yml](./templates/openpanel.yml)     | Open-source analytics platform         | PostgreSQL, Redis, ClickHouse |
-| [penpot.yml](./templates/penpot.yml)           | Open-source design and prototyping     | Multiple services             |
-| [pocketbase.yml](./templates/pocketbase.yml)   | Backend-as-a-Service in one file       | SQLite (embedded)             |
-| [postgres.yml](./templates/postgres.yml)       | PostgreSQL database server             | Standalone                    |
-| [rustfs.yml](./templates/rustfs.yml)           | Rust-based file system service         | Standalone                    |
-| [rybbit.yml](./templates/rybbit.yml)           | Analytics and tracking platform        | PostgreSQL, ClickHouse        |
-| [typesense.yml](./templates/typesense.yml)     | Fast, typo-tolerant search engine      | Standalone                    |
-| [valkey.yml](./templates/valkey.yml)           | Redis-compatible key-value store       | Standalone                    |
-| [And more](./templates/)                       | More templates                         |                               |
 
 ## Quick Start: Creating a Template
 
@@ -134,41 +140,7 @@ For multiple routes, increment the index: `routes.0`, `routes.1`, `routes.2`.
 
 ### CLI Deployment (for testing)
 
-Use the included `deploy_compose.py` script to deploy templates directly from the command line:
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy .env.example to .env and configure your settings
-cp .env.example .env
-
-# Deploy a template
-python deploy_compose.py -f n8n.yml -p my-project -e production
-
-# With custom stack slug
-python deploy_compose.py -f postgres.yml -p my-project -e production -s my-postgres
-
-# Against a different ZaneOps instance
-python deploy_compose.py -f grafana.yml -p my-project -e production -u https://zaneops.example.com
-```
-
-**Options:**
-
-| Flag             | Description               | Default                    |
-| ---------------- | ------------------------- | -------------------------- |
-| `-f, --file`     | Path to compose YAML file | Required                   |
-| `-p, --project`  | Project slug              | `compose`                  |
-| `-e, --env`      | Environment slug          | `production`               |
-| `-s, --slug`     | Stack slug                | Filename without extension |
-| `-u, --base-url` | ZaneOps API URL           | `http://localhost:8000`    |
-| `--username`     | Login username            | `admin`                    |
-| `--password`     | Login password            | `password`                 |
-| `-m, --message`  | Deployment commit message | `Deploy from CLI`          |
-
-**Environment Variables:** Copy `.env.example` to `.env` to preload default values for `BASE_URL`, `PROJECT_SLUG`, `ENV_SLUG`, `USERNAME`, and `PASSWORD`. Command-line flags override `.env` values.
-
-The script will create or update the stack and trigger a deployment, then display the generated URLs, configs, and volumes.
+See [scripts/README.md](scripts/README.md).
 
 ## Documentation
 
