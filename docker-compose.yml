@@ -1,0 +1,23 @@
+x-zane-env:
+  TYPESENSE_API_KEY: "{{ generate_password | 32 }}"
+  TYPESENSE_ENABLE_CORS: "true"
+  TYPESENSE_DOMAIN: "{{ generate_domain }}"
+
+version: "3.8"
+services:
+  typesense:
+    image: typesense/typesense:29.0
+    restart: unless-stopped
+    environment:
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY:-typesense}
+      - TYPESENSE_ENABLE_CORS=${TYPESENSE_ENABLE_CORS:-true}
+      - TYPESENSE_DATA_DIR=/data
+    volumes:
+      - typesense-data:/data
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${TYPESENSE_DOMAIN}
+        zane.http.routes.0.port: 8108
+
+volumes:
+  typesense-data:
