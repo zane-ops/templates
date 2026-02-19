@@ -1,32 +1,39 @@
 ---
 import { Icon } from "@astrojs/starlight/components";
-import DefaultFooter from "@astrojs/starlight/components/Footer.astro";
+import EditLink from "@astrojs/starlight/components/EditLink.astro";
 ---
 
-<DefaultFooter {...Astro.props} />
+<footer class="sl-flex flex-col">
+    <div class="meta sl-flex">
+        <EditLink />
+    </div>
 
-<div class="custom-meta sl-flex my-3">
-    <div class="flex flex-col">
-        <a
-            href={`https://github.com/zane-ops/zane-ops/issues/new?template=bug_report.md`}
-            class="flex gap-1"
-        >
-            <Icon name="github" size="1em" />
-            Found a bug? Open an issue
-        </a>
-        <a href={`https://github.com/sponsors/Fredkiss3`} class="flex gap-1">
-            <Icon name="heart" size="1em" />
-            Sponsor this project
-        </a>
-        <a href={`https://discord.gg/DUdz2vrh9y`} class="flex gap-1">
-            <Icon name="discord" size="1em" />
-            Community
-        </a>
+    <div class="custom-meta sl-flex my-3">
+        <div class="flex flex-col">
+            <a
+                href={`https://github.com/zane-ops/zane-ops/issues/new?template=bug_report.md`}
+                class="flex gap-1"
+            >
+                <Icon name="github" size="1em" />
+                Found a bug? Open an issue
+            </a>
+            <a
+                href={`https://github.com/sponsors/Fredkiss3`}
+                class="flex gap-1"
+            >
+                <Icon name="heart" size="1em" />
+                Sponsor this project
+            </a>
+            <a href={`https://discord.gg/DUdz2vrh9y`} class="flex gap-1">
+                <Icon name="discord" size="1em" />
+                Community
+            </a>
+        </div>
+        <div>
+            <p>Built with Astro &amp; deployed on ZaneOps</p>
+        </div>
     </div>
-    <div>
-        <p>Built with Astro &amp; deployed on ZaneOps</p>
-    </div>
-</div>
+</footer>
 
 <style is:global>
     .meta {
