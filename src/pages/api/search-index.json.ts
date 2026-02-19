@@ -9,6 +9,7 @@ interface SearchDoc {
 	description: string;
 	tags: string[];
 	url: string;
+	logoUrl: string;
 }
 
 export const GET: APIRoute = async () => {
@@ -20,6 +21,7 @@ export const GET: APIRoute = async () => {
 		description: entry.data.description,
 		tags: entry.data.tags,
 		url: `/templates/${entry.data.slug}`,
+		logoUrl: entry.data.logoUrl ?? '',
 	}));
 
 	return new Response(JSON.stringify(docs), {

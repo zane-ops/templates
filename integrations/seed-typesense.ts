@@ -11,7 +11,8 @@ const fields = [
   { name: "name", type: "string" },
   { name: "description", type: "string" },
   { name: "tags", type: "string[]" },
-  { name: "url", type: "string", index: false }
+  { name: "url", type: "string", index: false },
+  { name: "logoUrl", type: "string", index: false, optional: true }
 ];
 
 export default function seedTypesense(): AstroIntegration {

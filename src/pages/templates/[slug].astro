@@ -18,10 +18,10 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { name, description, tags } = entry.data;
 
-// src/pages/templates/ → ../../ → src/ → content/templates/[slug].yml
+// src/pages/templates/ → ../../ → src/ → content/templates/[slug]/compose.yml
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ymlPath = resolve(__dirname, '../../content/templates', `${entry.data.slug}.yml`);
+const ymlPath = resolve(__dirname, '../../content/templates', entry.data.slug, 'compose.yml');
 const yamlContent = readFileSync(ymlPath, 'utf-8');
 ---
 
