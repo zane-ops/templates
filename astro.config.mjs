@@ -5,6 +5,14 @@ import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
+const extraIntegrations = [];
+if (process.env.SEED_TYPESENSE === "true") {
+  const { default: seedTypesense } = await import(
+    "./integrations/seed-typesense.ts"
+  );
+  extraIntegrations.push(seedTypesense());
+}
+
 // https://astro.build/config
 export default defineConfig({
   output: "static",
@@ -45,7 +53,8 @@ export default defineConfig({
         Footer: "./src/components/Footer.astro",
         Head: "./src/components/Head.astro"
       }
-    })
+    }),
+    ...extraIntegrations
   ],
   vite: {
     plugins: [tailwindcss()]

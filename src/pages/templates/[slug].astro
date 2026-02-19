@@ -1,0 +1,44 @@
+---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import { Code } from 'astro:components';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolve, dirname } from 'node:path';
+
+export async function getStaticPaths() {
+	const templates = await getCollection('templates');
+	return templates.map((entry) => ({
+		params: { slug: entry.data.slug },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const { name, description, tags } = entry.data;
+
+// src/pages/templates/ → ../../ → src/ → content/templates/[slug].yml
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const ymlPath = resolve(__dirname, '../../content/templates', `${entry.data.slug}.yml`);
+const yamlContent = readFileSync(ymlPath, 'utf-8');
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{name} — ZaneOps Templates</title>
+	</head>
+	<body>
+		<main>
+			<h1>{name}</h1>
+			<p>{description}</p>
+			<ul>
+				{tags.map((tag) => <li>{tag}</li>)}
+			</ul>
+			<Code code={yamlContent} lang="yaml" />
+		</main>
+	</body>
+</html>
