@@ -41,7 +41,7 @@ services:
       PENPOT_REDIS_URI: redis://penpot-redis/0
       PENPOT_ASSETS_STORAGE_BACKEND: assets-fs
       PENPOT_STORAGE_ASSETS_FS_DIRECTORY: /opt/data/assets
-      PENPOT_TELEMETRY_ENABLED: false
+      # PENPOT_TELEMETRY_ENABLED: false # to disable telemetry
       PENPOT_SMTP_DEFAULT_FROM: no-reply@example.com
       PENPOT_SMTP_DEFAULT_REPLY_TO: no-reply@example.com
       PENPOT_SMTP_HOST: penpot-mailcatch
