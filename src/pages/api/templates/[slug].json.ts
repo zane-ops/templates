@@ -11,8 +11,12 @@ export async function getStaticPaths() {
   }));
 }
 
+type TemplateCollection = Awaited<
+  ReturnType<typeof getCollection<"templates">>
+>;
+
 export const GET: APIRoute = ({ props }) => {
-  const { entry } = props;
+  const { entry } = props as { entry: TemplateCollection[number] };
 
   const ymlPath = resolve(
     process.cwd(),
@@ -32,6 +36,7 @@ export const GET: APIRoute = ({ props }) => {
       githubUrl: entry.data.githubUrl ?? null,
       docsUrl: entry.data.docsUrl ?? null,
       websiteUrl: entry.data.websiteUrl ?? null,
+      content: entry.body ?? null,
       url: `/templates/${entry.data.slug}`,
       compose
     }),
