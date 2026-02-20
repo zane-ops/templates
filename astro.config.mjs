@@ -1,7 +1,6 @@
 // @ts-check
 
 import node from "@astrojs/node";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 
 const { default: seedTypesense } = await import(
@@ -37,7 +36,6 @@ export default defineConfig({
     seedTypesense()
   ],
   vite: {
-    plugins: [tailwindcss()],
     ssr: {
       noExternal: ['zod'],
     },
