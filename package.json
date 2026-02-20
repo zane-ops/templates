@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "trap 'bun dc:stop && exit 0' SIGINT; trap 'exit 0' SIGTERM; bun dc:start && astro dev",
-    "start": "astro dev",
+    "start": "astro dev --port ${PORT:-4321} --host",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

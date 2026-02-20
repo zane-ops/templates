@@ -8,7 +8,7 @@ const COLLECTION_NAME = "templates";
 
 const fields = [
   { name: "id", type: "string" },
-  { name: "name", type: "string" },
+  { name: "name", type: "string", sort: true },
   { name: "description", type: "string" },
   { name: "tags", type: "string[]" },
   { name: "url", type: "string", index: false },

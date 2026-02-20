@@ -1,7 +1,6 @@
 // @ts-check
 
 import node from "@astrojs/node";
-import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 
@@ -35,37 +34,6 @@ export default defineConfig({
     }
   },
   integrations: [
-    // starlight({
-    //   title: "ZaneOps templates directory",
-    //   logo: {
-    //     light: "./src/assets/ZaneOps-SYMBOL-BLACK.svg",
-    //     dark: "./src/assets/ZaneOps-SYMBOL-WHITE.svg",
-    //     replacesTitle: true
-    //   },
-    //   editLink: {
-    //     baseUrl: "https://github.com/zane-ops/templates/edit/main/"
-    //   },
-    //   customCss: [
-    //     "./src/assets/global.css",
-    //     "./src/assets/fonts/font-face.css"
-    //   ],
-    //   social: [
-    //     {
-    //       label: "Github",
-    //       icon: "github",
-    //       href: "https://github.com/zane-ops/zane-ops"
-    //     },
-    //     {
-    //       label: "Discord",
-    //       icon: "discord",
-    //       href: "https://zaneops.dev/discord"
-    //     }
-    //   ],
-    //   components: {
-    //     Footer: "./src/components/Footer.astro",
-    //     Head: "./src/components/Head.astro"
-    //   }
-    // }),
     seedTypesense()
   ],
   vite: {

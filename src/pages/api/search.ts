@@ -1,6 +1,7 @@
 import { z } from "astro:content";
 import type { APIRoute } from "astro";
 import { typesenseClient } from "../../lib/typesense.js";
+import type { SearchParams } from "typesense";
 
 export const prerender = false;
 
@@ -24,11 +25,12 @@ export const GET: APIRoute = async ({ url }) => {
     per_page: url.searchParams.get("per_page")
   });
 
-  const searchRequest: Record<string, unknown> = {
+  const searchRequest: SearchParams<any> = {
     q: params.q,
     query_by: "name,description,tags",
     per_page: params.per_page,
-    page: params.page
+    page: params.page,
+    sort_by: 'name:asc'
   };
 
   if (params.tags.length > 0) {
@@ -42,13 +44,29 @@ export const GET: APIRoute = async ({ url }) => {
       .search(searchRequest);
 
     return new Response(JSON.stringify(results), {
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      }
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Search failed";
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      }
     });
   }
+};
+
+export const OPTIONS: APIRoute = () => {
+  return new Response(null, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "*"
+    }
+  });
 };

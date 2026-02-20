@@ -18,15 +18,10 @@ export async function ensureCollection(
 	fields: Array<{ name: string; type: string; index?: boolean }>
 ): Promise<void> {
 	try {
-		await typesenseClient.collections(name).retrieve();
-	} catch (err: unknown) {
-		const isNotFound =
-			err instanceof Error && err.message.toLowerCase().includes('not found');
-		if (isNotFound) {
-			// biome-ignore lint/suspicious/noExplicitAny: Typesense types are strict
-			await typesenseClient.collections().create({ name, fields } as any);
-		} else {
-			throw err;
-		}
+		await typesenseClient.collections(name).delete();
+	} catch {
+		// collection didn't exist, that's fine
 	}
+	// biome-ignore lint/suspicious/noExplicitAny: Typesense types are strict
+	await typesenseClient.collections().create({ name, fields } as any);
 }

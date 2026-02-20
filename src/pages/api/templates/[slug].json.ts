@@ -28,7 +28,6 @@ export const GET: APIRoute = ({ props }) => {
       name: entry.data.name,
       description: entry.data.description,
       tags: entry.data.tags,
-      logo: entry.data.logo ?? null,
       logoUrl: entry.data.logoUrl || null,
       githubUrl: entry.data.githubUrl ?? null,
       docsUrl: entry.data.docsUrl ?? null,
