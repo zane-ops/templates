@@ -4,7 +4,7 @@ import { docsSchema } from '@astrojs/starlight/schema';
 import { glob } from 'astro/loaders';
 
 export const collections = {
-	docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
+	// docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
 	templates: defineCollection({
 		loader: glob({ pattern: '*/index.md', base: './src/content/templates' }),
 		schema: z.object({
