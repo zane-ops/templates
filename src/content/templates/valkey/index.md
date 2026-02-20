@@ -11,7 +11,7 @@ tags:
 - redis
 - in-memory
 logo: valkey
-logoUrl: /logos/valkey.svg
+logoUrl: /logos/valkey.png
 githubUrl: https://github.com/valkey-io/valkey
 docsUrl: https://github.com/valkey-io/valkey
 websiteUrl: https://valkey.io/
