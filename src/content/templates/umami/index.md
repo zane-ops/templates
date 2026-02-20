@@ -1,7 +1,15 @@
 ---
 name: Umami
 slug: umami
-description: Simple, fast, privacy-focused open-source web analytics alternative to Google Analytics, backed by PostgreSQL.
-tags: [analytics, web-analytics, privacy, google-analytics-alternative]
+description: Umami is a simple, fast, privacy-focused alternative to Google Analytics.
+tags:
+- analytics
+- web-analytics
+- privacy
+- google-analytics-alternative
 logo: umami
+logoUrl: /logos/umami.png
+githubUrl: https://github.com/umami-software/umami
+docsUrl: https://umami.is/docs
+websiteUrl: https://umami.is
 ---

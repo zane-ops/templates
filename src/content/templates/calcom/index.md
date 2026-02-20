@@ -1,7 +1,16 @@
 ---
 name: Cal.com
 slug: calcom
-description: Open-source scheduling and booking platform that lets you manage appointments and availability, backed by PostgreSQL and Redis.
-tags: [scheduling, calendar, booking, productivity]
+description: Calcom is a open source alternative to Calendly that allows to create
+  scheduling and booking services.
+tags:
+- scheduling
+- calendar
+- booking
+- productivity
 logo: calcom
+logoUrl: /logos/calcom.jpg
+githubUrl: https://github.com/calcom/cal.com
+docsUrl: https://cal.com/docs
+websiteUrl: https://cal.com/
 ---

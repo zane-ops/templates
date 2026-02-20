@@ -1,7 +1,29 @@
 ---
 name: Appwrite
 slug: appwrite
-description: Open-source backend-as-a-service platform providing auth, databases, storage, functions, and realtime APIs with a full worker and scheduler stack backed by MariaDB and Redis.
-tags: [backend, baas, authentication, database, storage]
+description: 'Appwrite is an end-to-end platform for building Web, Mobile, Native,
+  or Backend apps, packaged as a set of Docker microservices. It includes both a backend
+  server and a fully integrated hosting solution for deploying static and server-side
+  rendered frontends. Appwrite abstracts the complexity and repetitiveness required
+  to build modern apps from scratch and allows you to build secure, full-stack applications
+  faster.
+
+  Using Appwrite, you can easily integrate your app with user authentication and multiple
+  sign-in methods, a database for storing and querying users and team data, storage
+  and file management, image manipulation, Cloud Functions, messaging, and more services.'
+tags:
+- backend
+- baas
+- authentication
+- database
+- storage
+- firebase
+- mariadb
+- hosting
+- self-hosted
 logo: appwrite
+logoUrl: /logos/appwrite.svg
+githubUrl: https://github.com/appwrite/appwrite
+docsUrl: https://appwrite.io/docs
+websiteUrl: https://appwrite.io/
 ---

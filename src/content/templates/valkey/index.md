@@ -1,7 +1,18 @@
 ---
 name: Valkey
 slug: valkey
-description: Open-source Redis-compatible key-value store forked from Redis, with password-protected AOF persistence and configurable connection URLs for in-network and global access.
-tags: [database, cache, redis-compatible, key-value]
+description: Valkey is an open-source fork of Redis, backed by AWS and the Linux Foundation.
+  It provides a high-performance, in-memory data structure store with Redis compatibility.
+tags:
+- database
+- cache
+- redis-compatible
+- key-value
+- redis
+- in-memory
 logo: valkey
+logoUrl: /logos/valkey.svg
+githubUrl: https://github.com/valkey-io/valkey
+docsUrl: https://github.com/valkey-io/valkey
+websiteUrl: https://valkey.io/
 ---

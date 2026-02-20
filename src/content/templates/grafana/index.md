@@ -1,7 +1,15 @@
 ---
 name: Grafana
 slug: grafana
-description: Leading open-source observability and data visualization platform for building dashboards and alerting on metrics from any data source.
-tags: [monitoring, observability, dashboards, metrics]
+description: Grafana is an open source platform for data visualization and monitoring.
+tags:
+- monitoring
+- observability
+- dashboards
+- metrics
 logo: grafana
+logoUrl: /logos/grafana.svg
+githubUrl: https://github.com/grafana/grafana
+docsUrl: https://grafana.com/docs/
+websiteUrl: https://grafana.com/
 ---

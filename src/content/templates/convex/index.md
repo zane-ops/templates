@@ -1,7 +1,17 @@
 ---
 name: Convex
 slug: convex
-description: Open-source reactive backend platform with a real-time database, cloud functions, and file storage, including a self-hosted dashboard for managing deployments.
-tags: [backend, database, realtime, functions]
+description: Convex is an open-source reactive database designed to make life easy
+  for web app developers.
+tags:
+- backend
+- database
+- realtime
+- functions
+- api
 logo: convex
+logoUrl: /logos/convex.svg
+githubUrl: https://github.com/get-convex/convex
+docsUrl: https://www.convex.dev/docs
+websiteUrl: https://www.convex.dev/
 ---

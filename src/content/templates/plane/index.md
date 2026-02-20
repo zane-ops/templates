@@ -1,7 +1,16 @@
 ---
 name: Plane
 slug: plane
-description: Open-source project management and issue tracking tool similar to Linear and Jira, with a full-stack architecture including API, workers, MinIO storage, and RabbitMQ message queue.
-tags: [project-management, issue-tracking, productivity, linear-alternative]
+description: Easy, flexible, open source project management software
+tags:
+- project-management
+- issue-tracking
+- productivity
+- linear-alternative
+- kanban
 logo: plane
+logoUrl: /logos/plane.png
+githubUrl: https://github.com/makeplane/plane
+docsUrl: https://docs.plane.so/
+websiteUrl: https://plane.so
 ---

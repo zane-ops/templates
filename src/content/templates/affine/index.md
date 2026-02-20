@@ -1,7 +1,19 @@
 ---
 name: AFFiNE
 slug: affine
-description: Open-source knowledge base and collaboration workspace combining docs, whiteboards, and databases with real-time multiplayer editing, backed by PostgreSQL and Redis.
-tags: [collaboration, knowledge-base, whiteboard, productivity]
+description: Affine Pro is a modern, self-hosted platform designed for collaborative
+  content creation and project management. It offers an intuitive interface, seamless
+  real-time collaboration, and powerful tools for organizing tasks, notes, and ideas.
+tags:
+- collaboration
+- knowledge-base
+- whiteboard
+- productivity
+- self-hosted
+- project-management
 logo: affine
+logoUrl: /logos/affine.png
+githubUrl: https://github.com/toeverything/Affine
+docsUrl: https://affine.pro/docs
+websiteUrl: https://affine.pro/
 ---

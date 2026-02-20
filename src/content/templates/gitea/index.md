@@ -1,7 +1,19 @@
 ---
 name: Gitea
 slug: gitea
-description: Lightweight self-hosted Git service with issue tracking, pull requests, CI/CD, and package registry, backed by PostgreSQL.
-tags: [git, devops, version-control, ci-cd]
+description: Gitea bundled with PostgreSQL.
+tags:
+- git
+- devops
+- version-control
+- ci-cd
+- scm
+- postgres
+- developer-tools
+- self-hosted
 logo: gitea
+logoUrl: /logos/gitea.png
+githubUrl: https://github.com/go-gitea/gitea
+docsUrl: https://docs.gitea.com/
+websiteUrl: https://gitea.io/
 ---
