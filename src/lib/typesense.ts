@@ -1,5 +1,6 @@
 import Typesense from 'typesense';
 
+
 export const typesenseClient = new Typesense.Client({
 	nodes: [
 		{
@@ -8,7 +9,7 @@ export const typesenseClient = new Typesense.Client({
 			protocol: (process.env.TYPESENSE_PROTOCOL ?? 'http') as 'http' | 'https',
 		},
 	],
-	apiKey: process.env.TYPESENSE_API_KEY ?? 'xyz',
+	apiKey: process.env.TYPESENSE_API_KEY ?? 'typesense',
 	connectionTimeoutSeconds: 10,
 });
 

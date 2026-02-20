@@ -10,7 +10,7 @@ tags:
 - scm
 - postgres
 - developer-tools
-- self-hosted
+
 logo: gitea
 logoUrl: /logos/gitea.png
 githubUrl: https://github.com/go-gitea/gitea

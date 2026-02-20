@@ -20,7 +20,7 @@ tags:
 - firebase
 - mariadb
 - hosting
-- self-hosted
+
 logo: appwrite
 logoUrl: /logos/appwrite.svg
 githubUrl: https://github.com/appwrite/appwrite

@@ -5,8 +5,7 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import { Code } from "astro:components";
 import { getCollection } from "astro:content";
 import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 export async function getStaticPaths() {
 	const templates = await getCollection("templates");
@@ -19,12 +18,9 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { name, description, tags } = entry.data;
 
-// src/pages/templates/ → ../../ → src/ → content/templates/[slug]/compose.yml
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const ymlPath = resolve(
-	__dirname,
-	"../../content/templates",
+	process.cwd(),
+	"src/content/templates",
 	entry.data.slug,
 	"compose.yml",
 );

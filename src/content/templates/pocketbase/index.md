@@ -7,7 +7,6 @@ tags:
 - baas
 - database
 - authentication
-- self-hosted
 - api
 logo: pocketbase
 logoUrl: /logos/pocketbase.svg

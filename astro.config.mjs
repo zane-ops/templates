@@ -3,18 +3,18 @@
 import node from "@astrojs/node";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 
-const extraIntegrations = [];
-if (process.env.SEED_TYPESENSE === "true") {
-  const { default: seedTypesense } = await import(
-    "./integrations/seed-typesense.ts"
-  );
-  extraIntegrations.push(seedTypesense());
-}
+const { default: seedTypesense } = await import(
+  "./integrations/seed-typesense.ts"
+);
+
+const defaultDomain = process.env.ZANE_DOMAINS?.split(",")[0] || "zaneops.dev";
+const scheme = process.env.NODE_ENV === "production" ? "https" : "http";
 
 // https://astro.build/config
 export default defineConfig({
+  site: `${scheme}://${defaultDomain}`,
   output: "static",
   adapter: node({
     mode: "standalone"
@@ -22,9 +22,17 @@ export default defineConfig({
   devToolbar: {
     enabled: false
   },
+  env: {
+    schema: {
+      TYPESENSE_KEY: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+    }
+  },
   integrations: [
     starlight({
-      title: "ZaneOps documentation",
+      title: "ZaneOps templates directory",
       logo: {
         light: "./src/assets/ZaneOps-SYMBOL-BLACK.svg",
         dark: "./src/assets/ZaneOps-SYMBOL-WHITE.svg",
@@ -54,9 +62,12 @@ export default defineConfig({
         Head: "./src/components/Head.astro"
       }
     }),
-    ...extraIntegrations
+    seedTypesense()
   ],
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    ssr: {
+      noExternal: ['zod'],
+    },
   }
 });

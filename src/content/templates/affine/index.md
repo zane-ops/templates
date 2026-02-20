@@ -9,7 +9,7 @@ tags:
 - knowledge-base
 - whiteboard
 - productivity
-- self-hosted
+
 - project-management
 logo: affine
 logoUrl: /logos/affine.png

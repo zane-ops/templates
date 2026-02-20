@@ -7,7 +7,7 @@ tags:
 - search
 - full-text-search
 - api
-- self-hosted
+
 logo: typesense
 logoUrl: /logos/typesense.png
 githubUrl: https://github.com/typesense/typesense

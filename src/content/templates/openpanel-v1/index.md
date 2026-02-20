@@ -7,7 +7,6 @@ tags:
 - analytics
 - product-analytics
 - clickhouse
-- self-hosted
 logo: openpanel-v1
 logoUrl: /logos/openpanel-v1.svg
 githubUrl: https://github.com/Openpanel-dev/openpanel

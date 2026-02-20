@@ -8,7 +8,7 @@ tags:
 - web-analytics
 - privacy
 - clickhouse
-- self-hosted
+
 logo: rybbit
 logoUrl: /logos/rybbit.png
 githubUrl: https://github.com/rybbit-io/rybbit

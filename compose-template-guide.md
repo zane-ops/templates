@@ -129,7 +129,7 @@ This flag automatically shares registry credentials with Docker Swarm workers, e
 **Example use cases**:
 - Private images from DockerHub: `myorg/private-app:latest`
 - GitHub Container Registry: `ghcr.io/myorg/app:latest`
-- Self-hosted registries: `registry.company.com/app:latest`
+ registries: `registry.company.com/app:latest`
 
 ### Registry Authentication Setup
 

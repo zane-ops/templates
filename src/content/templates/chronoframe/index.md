@@ -1,7 +1,7 @@
 ---
 name: ChronoFrame
 slug: chronoframe
-description: Self-hosted photo journal and memory-tracking application built with Nuxt, supporting local or S3 storage and configurable map providers for geo-tagged entries.
-tags: [photos, journal, gallery, maps, self-hosted]
+description: Self-hosted personal gallery application with online photo management and albums, supporting Live/Motion Photos, EXIF parsing, geolocation recognition, and an explore map.
+tags: [photos, journal, gallery, maps]
 logo: chronoframe
 ---

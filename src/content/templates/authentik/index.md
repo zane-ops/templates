@@ -13,7 +13,7 @@ tags:
 - authentication
 - security
 - oidc
-- self-hosted
+
 logo: authentik
 logoUrl: /logos/authentik.svg
 githubUrl: https://github.com/goauthentik/authentik

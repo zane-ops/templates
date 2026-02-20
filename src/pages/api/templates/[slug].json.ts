@@ -1,7 +1,6 @@
 import { getCollection } from "astro:content";
 import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import type { APIRoute } from "astro";
 
 export async function getStaticPaths() {
@@ -15,11 +14,9 @@ export async function getStaticPaths() {
 export const GET: APIRoute = ({ props }) => {
   const { entry } = props;
 
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
   const ymlPath = resolve(
-    __dirname,
-    "../../../content/templates",
+    process.cwd(),
+    "src/content/templates",
     entry.data.slug,
     "compose.yml"
   );
