@@ -7,7 +7,7 @@ const { default: seedTypesense } = await import(
   "./integrations/seed-typesense.ts"
 );
 
-const defaultDomain = process.env.ZANE_DOMAINS?.split(",")[0] || "zaneops.dev";
+const defaultDomain = process.env.ZANE_DOMAINS?.split(",")[0] || "templates.zaneops.dev";
 const scheme = process.env.NODE_ENV === "production" ? "https" : "http";
 
 // https://astro.build/config

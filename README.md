@@ -2,32 +2,83 @@
 
 A curated collection of production-ready Docker Compose templates for deploying popular open-source applications on [ZaneOps](https://zaneops.dev).
 
+This repository is an API backend — it exposes template data as JSON endpoints, backed by [Typesense](https://typesense.org) for full-text search.
+
+## API Endpoints
+
+| Endpoint                        | Description                                     |
+| :------------------------------ | :---------------------------------------------- |
+| `GET /api/search`               | Full-text search with filtering and pagination  |
+| `GET /api/templates/:slug.json` | Fetch a single template by slug                 |
+| `GET /api/search-index.json`    | Full list of templates (used to seed Typesense) |
+
+### `GET /api/search`
+
+Query parameters:
+
+| Param      | Type     | Default | Description                 |
+| :--------- | :------- | :------ | :-------------------------- |
+| `q`        | string   | `""`    | Search query                |
+| `tags`     | string[] | `[]`    | Filter by tags (repeatable) |
+| `page`     | number   | `1`     | Page number                 |
+| `per_page` | number   | `20`    | Results per page (max 100)  |
+
 ## Project Structure
 
 ```
 .
 ├── public/
+│   └── logos/              # Template logo assets
 ├── src/
-│   ├── assets/
 │   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
+│   │   └── templates/      # Template markdown files (one per template)
+│   ├── lib/
+│   │   └── typesense.ts    # Typesense client & collection helpers
+│   ├── pages/
+│   │   └── api/
+│   │       ├── search.ts               # Search endpoint
+│   │       ├── search-index.json.ts    # Full index (used for seeding)
+│   │       └── templates/[slug].json.ts
+├── integrations/
+│   └── seed-typesense.ts   # Seeds Typesense on dev start & build
 ├── astro.config.mjs
 ├── package.json
 └── tsconfig.json
 ```
 
-Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build). Documentation lives in `src/content/docs/` as `.md` or `.mdx` files — each file is exposed as a route based on its file name.
+Built with [Astro](https://astro.build).
 
 ## Commands
 
-| Command               | Action                                           |
-| :-------------------- | :----------------------------------------------- |
-| `bun install`         | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| Command       | Action                               |
+| :------------ | :----------------------------------- |
+| `bun install` | Install dependencies                 |
+| `bun dev`     | Start dev server at `localhost:4321` |
+| `bun build`   | Build to `./dist/`                   |
+| `bun preview` | Preview the production build locally |
+
+## Environment Variables
+
+| Variable         | Description                              |
+| :--------------- | :--------------------------------------- |
+| `TYPESENSE_HOST` | Typesense host (default: `localhost`)    |
+| `TYPESENSE_KEY`  | Typesense API key (default: `typesense`) |
+| `ZANE_DOMAINS`   | Comma-separated list of domains          |
+
+## How Seeding Works
+
+On `bun dev`, the Astro integration in [integrations/seed-typesense.ts](integrations/seed-typesense.ts) fetches `/api/search-index.json` from the running dev server and upserts all documents into Typesense.
+
+On `bun build`, it reads the prerendered `search-index.json` from `dist/` and does the same.
+
+The collection is **dropped and recreated** on every seed to ensure schema changes are always applied.
+
+## Adding a Template
+
+1. Create a new directory under `src/content/templates/<slug>/`
+2. Add an `index.md` with the template frontmatter and Docker Compose content
+3. Add a logo to `public/logos/`
+4. Restart the dev server — the template will be seeded into Typesense automatically
 
 ## What is ZaneOps?
 
@@ -92,6 +143,7 @@ Define in `x-zane-env`, reference with `${VAR}`:
 | ---------------------------------- | ----------------------------------------- |
 | `{{ generate_domain }}`            | Auto-generated subdomain                  |
 | `{{ generate_password \| 32 }}`    | 32-char hex password                      |
+| `{{ generate_base64 \| 32 }}`      | 32-bytes random base64 string             |
 | `{{ generate_username }}`          | Random username (e.g., `reddog65`)        |
 | `{{ generate_slug }}`              | URL-friendly slug (e.g., `happy-tree-91`) |
 | `{{ generate_uuid }}`              | UUID v4                                   |
@@ -115,12 +167,12 @@ For multiple routes, increment the index: `routes.0`, `routes.1`, `routes.2`.
 
 1. **No `ports`** - Use routing labels instead
 2. **Use named volumes** - For persistent data
-3. **Use `network_alias`** - For service-to-service communication
+3. **Use `network_alias`** - For service-to-service communication outside of the stack in the same environment
 4. **Password length must be even** - `generate_password | 32` (not 31)
 
 ### What ZaneOps Ignores
 
-- `ports` - Use `deploy.labels` for routing
+- `ports` - Works, but use `deploy.labels` for HTTP routing instead
 - `expose` - Not needed
 - `restart` - Use `deploy.restart_policy`
 - `build` - Only pre-built images supported
@@ -137,43 +189,6 @@ For multiple routes, increment the index: `routes.0`, `routes.1`, `routes.2`.
    - Set up SSL certificates
    - Create necessary volumes
    - Start all services in the correct order
-
-### CLI Deployment (for testing)
-
-See [scripts/README.md](scripts/README.md).
-
-## Documentation
-
-For comprehensive documentation on creating and customizing templates, see the **[Compose Template Guide](compose-template-guide.md)**. This guide covers:
-
-- Template expressions and variable generation
-- Service configuration and routing
-- Volumes and Docker configs
-- Network architecture and service communication
-- Advanced patterns and troubleshooting
-- Migrating from Dokploy templates
-
-## Template Features
-
-### Health Checks
-
-All services include health checks to ensure reliability:
-- Automatic restarts on failure
-- Proper startup sequencing
-- Dependency management
-
-### Security
-
-- No hardcoded credentials
-- Auto-generated strong passwords (16-64 characters)
-- Encryption keys where needed
-- Isolated database credentials per service
-
-### Networking
-
-- Internal service communication via Docker networks
-- HTTP routing configured via ZaneOps labels
-- No exposed ports (ZaneOps handles ingress)
 
 ## Contributing
 
