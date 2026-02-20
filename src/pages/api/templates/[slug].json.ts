@@ -33,6 +33,9 @@ export const GET: APIRoute = ({ props }) => {
       tags: entry.data.tags,
       logo: entry.data.logo ?? null,
       logoUrl: entry.data.logoUrl || null,
+      githubUrl: entry.data.githubUrl ?? null,
+      docsUrl: entry.data.docsUrl ?? null,
+      websiteUrl: entry.data.websiteUrl ?? null,
       url: `/templates/${entry.data.slug}`,
       compose
     }),

@@ -14,6 +14,9 @@ export const collections = {
 			tags: z.array(z.string()),
 			logo: z.string().optional(),
 			logoUrl: z.string().optional(),
+			githubUrl: z.string().optional(),
+			docsUrl: z.string().optional(),
+			websiteUrl: z.string().optional(),
 		}),
 	}),
 };
