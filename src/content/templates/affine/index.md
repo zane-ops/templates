@@ -16,9 +16,3 @@ githubUrl: https://github.com/toeverything/Affine
 docsUrl: https://affine.pro/docs
 websiteUrl: https://affine.pro/
 ---
-
-## What is Affine?
-
-AFFiNE is a workspace with fully merged docs, whiteboards and databases.
-
-Get more things done, your creativity isn’t monotone.
