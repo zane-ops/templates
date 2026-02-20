@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "trap 'bun dc:stop && exit 0' SIGINT; trap 'exit 0' SIGTERM; bun dc:start && astro dev",
+    "dev": "trap 'bun dc:stop && exit 0' SIGINT; trap 'exit 0' SIGTERM; bun dc:start && bun start",
     "start": "astro dev --port ${PORT:-4321} --host",
     "build": "astro build",
     "preview": "astro preview",

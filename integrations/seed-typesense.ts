@@ -12,7 +12,7 @@ const fields = [
   { name: "description", type: "string" },
   { name: "tags", type: "string[]" },
   { name: "url", type: "string", index: false },
-  { name: "logoUrl", type: "string", index: false, optional: true },
+  { name: "logoUrl", type: "string", index: false, optional: true }
 ];
 
 async function seedFromDocs(docs: unknown[]) {
@@ -32,7 +32,7 @@ async function seedFromDocs(docs: unknown[]) {
     .import(cleanedDocs, { action: "upsert" });
 
   console.log(
-    `[seed-typesense] Upserted ${docs.length} documents into "${COLLECTION_NAME}".`,
+    `[seed-typesense] Upserted ${docs.length} documents into "${COLLECTION_NAME}".`
   );
 }
 
@@ -57,7 +57,7 @@ export default function seedTypesense(): AstroIntegration {
         } catch (err) {
           console.error(
             "[seed-typesense] Could not read search-index.json:",
-            err,
+            err
           );
           return;
         }
@@ -78,13 +78,13 @@ export default function seedTypesense(): AstroIntegration {
         } catch (err) {
           console.error(
             "[seed-typesense] Could not fetch search index from dev server:",
-            err,
+            err
           );
           return;
         }
 
         await seedFromDocs(docs);
-      },
-    },
+      }
+    }
   };
 }

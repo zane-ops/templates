@@ -1,7 +1,7 @@
 import { z } from "astro:content";
 import type { APIRoute } from "astro";
-import { typesenseClient } from "../../lib/typesense.js";
 import type { SearchParams } from "typesense";
+import { typesenseClient } from "~/lib/typesense.js";
 
 export const prerender = false;
 
@@ -13,15 +13,13 @@ const searchSchema = z.object({
 });
 
 export const GET: APIRoute = async ({ url }) => {
-  const rawTags = url.searchParams
-    .getAll("tags")
-    .map((t) => t.trim())
-    .filter(Boolean);
-
   const params = searchSchema.parse({
     q: url.searchParams.get("q"),
-    tags: rawTags,
     page: url.searchParams.get("page"),
+    tags: url.searchParams
+      .getAll("tags")
+      .map((t) => t.trim())
+      .filter(Boolean),
     per_page: url.searchParams.get("per_page")
   });
 
@@ -30,7 +28,7 @@ export const GET: APIRoute = async ({ url }) => {
     query_by: "name,description,tags",
     per_page: params.per_page,
     page: params.page,
-    sort_by: 'name:asc'
+    sort_by: "name:asc"
   };
 
   if (params.tags.length > 0) {
