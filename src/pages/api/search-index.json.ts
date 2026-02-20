@@ -9,7 +9,7 @@ interface SearchDoc {
 	description: string;
 	tags: string[];
 	url: string;
-	logoUrl: string;
+	logoUrl: string | null;
 }
 
 export const GET: APIRoute = async () => {
@@ -21,7 +21,7 @@ export const GET: APIRoute = async () => {
 		description: entry.data.description,
 		tags: entry.data.tags,
 		url: `/templates/${entry.data.slug}`,
-		logoUrl: entry.data.logoUrl ?? '',
+		logoUrl: entry.data.logoUrl || null,
 	}));
 
 	return new Response(JSON.stringify(docs), {

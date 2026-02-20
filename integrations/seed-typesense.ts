@@ -36,10 +36,21 @@ export default function seedTypesense(): AstroIntegration {
 
         await ensureCollection(COLLECTION_NAME, fields);
 
+        // Strip null logoUrl before sending to Typesense — optional fields must be omitted, not null
+        const cleanedDocs = (docs as Array<Record<string, unknown>>).map(
+          (doc) => {
+            if (!doc.logoUrl) {
+              const { logoUrl: _, ...rest } = doc;
+              return rest;
+            }
+            return doc;
+          }
+        );
+
         await typesenseClient
           .collections(COLLECTION_NAME)
           .documents()
-          .import(docs as object[], { action: "upsert" });
+          .import(cleanedDocs, { action: "upsert" });
 
         console.log(
           `[seed-typesense] Upserted ${docs.length} documents into "${COLLECTION_NAME}".`
