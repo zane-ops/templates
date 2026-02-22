@@ -7,7 +7,8 @@ const { default: seedTypesense } = await import(
   "./integrations/seed-typesense.ts"
 );
 
-const defaultDomain = process.env.ZANE_DOMAINS?.split(",")[0] || "templates.zaneops.dev";
+const defaultDomain =
+  process.env.ZANE_DOMAINS?.split(",")[0] || "templates.zaneops.dev";
 const scheme = process.env.NODE_ENV === "production" ? "https" : "http";
 
 // https://astro.build/config
@@ -25,19 +26,19 @@ export default defineConfig({
       TYPESENSE_KEY: envField.string({
         context: "server",
         access: "secret",
+        optional: false
       }),
       TYPESENSE_HOST: envField.string({
         context: "server",
         access: "secret",
-      }),
+        optional: false
+      })
     }
   },
-  integrations: [
-    seedTypesense()
-  ],
+  integrations: [seedTypesense()],
   vite: {
     ssr: {
-      noExternal: ['zod'],
-    },
+      noExternal: ["zod"]
+    }
   }
 });
