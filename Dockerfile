@@ -21,8 +21,7 @@ ARG TYPESENSE_HOST
 ENV ZANE_DOMAINS=${ZANE_DOMAINS}
 ENV TYPESENSE_KEY=${TYPESENSE_KEY}
 ENV TYPESENSE_HOST=${TYPESENSE_HOST}
-RUN --mount=type=cache,target=/app/.astro FORCE_COLOR=true pnpm run build
-RUN --mount=type=cache,target=/app/.astro FORCE_COLOR=true pnpm run db:migrate
+RUN --mount=type=cache,target=/app/.astro FORCE_COLOR=true bun run build
 
 
 RUN bun install --frozen-lockfile
