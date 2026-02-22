@@ -28,15 +28,19 @@ RUN bun install --frozen-lockfile
 
 # runtime
 FROM base AS runtime
+
+RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/*
+COPY --from=caddy:latest /usr/bin/caddy /usr/bin/caddy
+
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
-ARG HOST=0.0.0.0
-ARG PORT=3000
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY supervisord.conf /etc/supervisord.conf
 
-ENV HOST=${HOST}
+ARG PORT=80
 ENV PORT=${PORT}
 
 EXPOSE ${PORT}
 
-CMD ["bun", "run", "./dist/server/entry.mjs"]
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
