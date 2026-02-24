@@ -4,74 +4,25 @@ A curated collection of production-ready Docker Compose templates for deploying 
 
 This repository is an API backend — it exposes template data as JSON endpoints, backed by [Typesense](https://typesense.org) for full-text search.
 
-## API Endpoints
+## Table of Contents
 
-| Endpoint                        | Description                                     |
-| :------------------------------ | :---------------------------------------------- |
-| `GET /api/search`               | Full-text search with filtering and pagination  |
-| `GET /api/templates/:slug.json` | Fetch a single template by slug                 |
-| `GET /api/search-index.json`    | Full list of templates (used to seed Typesense) |
-
-### `GET /api/search`
-
-Query parameters:
-
-| Param      | Type     | Default | Description                 |
-| :--------- | :------- | :------ | :-------------------------- |
-| `q`        | string   | `""`    | Search query                |
-| `tags`     | string[] | `[]`    | Filter by tags (repeatable) |
-| `page`     | number   | `1`     | Page number                 |
-| `per_page` | number   | `20`    | Results per page (max 100)  |
-
-## Project Structure
-
-```
-.
-├── public/
-│   └── logos/              # Template logo assets
-├── src/
-│   ├── content/
-│   │   └── templates/      # Template markdown files (one per template)
-│   ├── lib/
-│   │   └── typesense.ts    # Typesense client & collection helpers
-│   ├── pages/
-│   │   └── api/
-│   │       ├── search.ts               # Search endpoint
-│   │       ├── search-index.json.ts    # Full index (used for seeding)
-│   │       └── templates/[slug].json.ts
-├── integrations/
-│   └── seed-typesense.ts   # Seeds Typesense on dev start & build
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
-
-Built with [Astro](https://astro.build).
-
-## Commands
-
-| Command       | Action                               |
-| :------------ | :----------------------------------- |
-| `bun install` | Install dependencies                 |
-| `bun dev`     | Start dev server at `localhost:4321` |
-| `bun build`   | Build to `./dist/`                   |
-| `bun preview` | Preview the production build locally |
-
-## Environment Variables
-
-| Variable         | Description                              |
-| :--------------- | :--------------------------------------- |
-| `TYPESENSE_HOST` | Typesense host (default: `localhost`)    |
-| `TYPESENSE_KEY`  | Typesense API key (default: `typesense`) |
-| `ZANE_DOMAINS`   | Comma-separated list of domains          |
-
-## How Seeding Works
-
-On `bun dev`, the Astro integration in [integrations/seed-typesense.ts](integrations/seed-typesense.ts) fetches `/api/search-index.json` from the running dev server and upserts all documents into Typesense.
-
-On `bun build`, it reads the prerendered `search-index.json` from `dist/` and does the same.
-
-The collection is **dropped and recreated** on every seed to ensure schema changes are always applied.
+- [Adding a Template](#adding-a-template)
+- [Quick Start: Creating a Template](#quick-start-creating-a-template)
+  - [Minimal Template](#minimal-template)
+  - [Template with Variables](#template-with-variables)
+  - [Template Expressions](#template-expressions)
+  - [Routing Labels](#routing-labels)
+  - [Key Rules](#key-rules)
+  - [What ZaneOps Ignores](#what-zaneops-ignores)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Commands](#commands)
+- [Environment Variables](#environment-variables)
+- [How Seeding Works](#how-seeding-works)
+- [What is ZaneOps?](#what-is-zaneops)
+- [Usage](#usage)
+- [Support](#support)
+- [License](#license)
 
 ## Adding a Template
 
@@ -79,17 +30,8 @@ The collection is **dropped and recreated** on every seed to ensure schema chang
 2. Add an `index.md` with the template frontmatter (name, slug, description, tags, logo, URLs)
 3. Add a `compose.yml` with the Docker Compose content
 4. Add a logo to `public/logos/`
-5. Restart the dev server — the template will be seeded into Typesense automatically
-
-## What is ZaneOps?
-
-ZaneOps is a platform for deploying and managing containerized applications. These templates are optimized for ZaneOps and include:
-
-- Automatic domain generation
-- Secure password generation
-- Built-in health checks
-- Proper service dependencies
-- Data persistence with volumes
+5. Run `bun run validate` to check your template passes all validation rules
+6. Restart the dev server — the template will be seeded into Typesense automatically
 
 ## Quick Start: Creating a Template
 
@@ -178,19 +120,108 @@ For multiple routes, increment the index: `routes.0`, `routes.1`, `routes.2`.
 - `restart` - Use `deploy.restart_policy`
 - `build` - Only pre-built images supported
 
+## API Endpoints
+
+| Endpoint                        | Description                                     |
+| :------------------------------ | :---------------------------------------------- |
+| `GET /api/search`               | Full-text search with filtering and pagination  |
+| `GET /api/templates/:slug.json` | Fetch a single template by slug                 |
+| `GET /api/search-index.json`    | Full list of templates (used to seed Typesense) |
+
+### `GET /api/search`
+
+Query parameters:
+
+| Param      | Type     | Default | Description                 |
+| :--------- | :------- | :------ | :-------------------------- |
+| `q`        | string   | `""`    | Search query                |
+| `tags`     | string[] | `[]`    | Filter by tags (repeatable) |
+| `page`     | number   | `1`     | Page number                 |
+| `per_page` | number   | `20`    | Results per page (max 100)  |
+
+## Project Structure
+
+```
+.
+├── public/
+│   └── logos/              # Template logo assets
+├── src/
+│   ├── content/
+│   │   └── templates/      # Template markdown files (one per template)
+│   ├── lib/
+│   │   └── typesense.ts    # Typesense client & collection helpers
+│   ├── pages/
+│   │   └── api/
+│   │       ├── search.ts               # Search endpoint
+│   │       ├── search-index.json.ts    # Full index (used for seeding)
+│   │       └── templates/[slug].json.ts
+├── integrations/
+│   └── seed-typesense.ts   # Seeds Typesense on dev start & build
+├── astro.config.mjs
+├── package.json
+└── tsconfig.json
+```
+
+Built with [Astro](https://astro.build).
+
+## Commands
+
+| Command            | Action                                          |
+| :----------------- | :---------------------------------------------- |
+| `bun install`      | Install dependencies                            |
+| `bun run validate` | Validate all templates against the schema rules |
+| `bun dev`          | Start dev server at `localhost:4321`            |
+| `bun build`        | Build to `./dist/`                              |
+| `bun preview`      | Preview the production build locally            |
+
+## Environment Variables
+
+| Variable         | Description                              |
+| :--------------- | :--------------------------------------- |
+| `TYPESENSE_HOST` | Typesense host (default: `localhost`)    |
+| `TYPESENSE_KEY`  | Typesense API key (default: `typesense`) |
+| `ZANE_DOMAINS`   | Comma-separated list of domains          |
+
+## How Seeding Works
+
+On `bun dev`, the Astro integration in [integrations/seed-typesense.ts](integrations/seed-typesense.ts) fetches `/api/search-index.json` from the running dev server and upserts all documents into Typesense.
+
+On `bun build`, it reads the prerendered `search-index.json` from `dist/` and does the same.
+
+The collection is **dropped and recreated** on every seed to ensure schema changes are always applied.
+
+## What is ZaneOps?
+
+ZaneOps is a platform for deploying and managing containerized applications. These templates are optimized for ZaneOps and include:
+
+- Automatic domain generation
+- Secure password generation
+- Built-in health checks
+- Proper service dependencies
+- Data persistence with volumes
+
 ## Usage
 
 ### Deploying on ZaneOps
 
+Browse the full template catalogue at **[zaneops.dev/templates](https://zaneops.dev/templates)**.
+
+The easiest way to deploy is directly from the ZaneOps dashboard:
+
+> **ZaneOps → Project → Create Compose Stack → From ZaneOps Template**
+
+This opens a searchable list of all templates in this repository. Select one and ZaneOps will deploy it instantly.
+
+Alternatively, you can deploy manually:
+
 1. Choose a template from this repository
-2. Copy/Paste the `.yml` file contents to your ZaneOps instance
+2. Copy/Paste the `.yml` file contents into your ZaneOps instance
 3. ZaneOps will automatically:
    - Generate secure passwords and secrets
    - Assign domains to your services
    - Set up SSL certificates
    - Create necessary volumes
    - Start all services in the correct order
-
 
 ## Support
 
