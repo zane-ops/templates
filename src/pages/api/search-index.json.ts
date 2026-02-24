@@ -20,7 +20,7 @@ export const GET: APIRoute = async () => {
     name: entry.data.name,
     description: entry.data.description,
     tags: entry.data.tags,
-    url: `/templates/${entry.data.slug}`,
+    url: `/api/templates/${entry.data.slug}.json`,
     logoUrl: entry.data.logoUrl || null
   }));
 
