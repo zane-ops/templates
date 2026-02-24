@@ -1,5 +1,6 @@
 ---
-title: Docmost
+name: Docmost
+slug: docmost
 description: Docmost, is an open-source collaborative wiki and documentation software.
 logoUrl: /logos/docmost.png
 githubUrl: https://github.com/docmost/docmost
