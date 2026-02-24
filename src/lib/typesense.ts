@@ -1,11 +1,5 @@
 import Typesense from "typesense";
 
-console.log({
-  host: process.env.TYPESENSE_HOST ?? "localhost",
-  port: 8108,
-  protocol: "http"
-});
-
 export const typesenseClient = new Typesense.Client({
   nodes: [
     {
