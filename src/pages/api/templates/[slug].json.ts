@@ -35,7 +35,7 @@ export const GET: APIRoute = ({ props }) => {
     githubUrl: entry.data.githubUrl ?? null,
     docsUrl: entry.data.docsUrl ?? null,
     websiteUrl: entry.data.websiteUrl ?? null,
-    url: `/templates/${entry.data.slug}`,
+    url: `/api/templates/${entry.data.slug}.json`,
     compose
   });
 };
