@@ -26,19 +26,16 @@ export const GET: APIRoute = ({ props }) => {
   );
   const compose = readFileSync(ymlPath, "utf-8");
 
-  return new Response(
-    JSON.stringify({
-      id: entry.data.slug,
-      name: entry.data.name,
-      description: entry.data.description,
-      tags: entry.data.tags,
-      logoUrl: entry.data.logoUrl || null,
-      githubUrl: entry.data.githubUrl ?? null,
-      docsUrl: entry.data.docsUrl ?? null,
-      websiteUrl: entry.data.websiteUrl ?? null,
-      url: `/templates/${entry.data.slug}`,
-      compose
-    }),
-    { headers: { "Content-Type": "application/json" } }
-  );
+  return Response.json({
+    id: entry.data.slug,
+    name: entry.data.name,
+    description: entry.data.description,
+    tags: entry.data.tags,
+    logoUrl: entry.data.logoUrl || null,
+    githubUrl: entry.data.githubUrl ?? null,
+    docsUrl: entry.data.docsUrl ?? null,
+    websiteUrl: entry.data.websiteUrl ?? null,
+    url: `/templates/${entry.data.slug}`,
+    compose
+  });
 };
