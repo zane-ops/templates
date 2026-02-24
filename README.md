@@ -4,6 +4,26 @@ A curated collection of production-ready Docker Compose templates for deploying 
 
 This repository is an API backend — it exposes template data as JSON endpoints, backed by [Typesense](https://typesense.org) for full-text search.
 
+## Table of Contents
+
+- [Adding a Template](#adding-a-template)
+- [Quick Start: Creating a Template](#quick-start-creating-a-template)
+  - [Minimal Template](#minimal-template)
+  - [Template with Variables](#template-with-variables)
+  - [Template Expressions](#template-expressions)
+  - [Routing Labels](#routing-labels)
+  - [Key Rules](#key-rules)
+  - [What ZaneOps Ignores](#what-zaneops-ignores)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Commands](#commands)
+- [Environment Variables](#environment-variables)
+- [How Seeding Works](#how-seeding-works)
+- [What is ZaneOps?](#what-is-zaneops)
+- [Usage](#usage)
+- [Support](#support)
+- [License](#license)
+
 ## Adding a Template
 
 1. Create a new directory under `src/content/templates/<slug>/`
