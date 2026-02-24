@@ -10,6 +10,8 @@ tags:
 - whiteboard
 - productivity
 - project-management
+- notion
+- wiki
 logo: affine
 logoUrl: /logos/affine.png
 githubUrl: https://github.com/toeverything/Affine

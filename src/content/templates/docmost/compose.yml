@@ -1,0 +1,50 @@
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+  APP_SECRET: "{{ generate_password | 32 }}"
+  POSTGRES_DB: docmost
+  POSTGRES_USER: docmost
+  POSTGRES_PASSWORD: "{{ generate_password | 32 }}"
+  APP_URL: https://${main_domain}
+
+services:
+  docmost:
+    image: docmost/docmost:0.4.1
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://redis:6379
+      APP_URL: ${APP_URL}
+      APP_SECRET: ${APP_SECRET}
+    volumes:
+      - type: volume
+        target: /app/data/storage
+        source: docmost
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.base_path: /
+        zane.http.routes.0.port: 3000
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        target: /var/lib/postgresql/data
+        source: db_docmost_data
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        target: /data
+        source: redis_docmost_data
+volumes:
+  docmost:
+  db_docmost_data:
+  redis_docmost_data:
