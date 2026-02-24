@@ -184,8 +184,18 @@ ZaneOps is a platform for deploying and managing containerized applications. The
 
 ### Deploying on ZaneOps
 
+Browse the full template catalogue at **[zaneops.dev/templates](https://zaneops.dev/templates)**.
+
+The easiest way to deploy is directly from the ZaneOps dashboard:
+
+> **ZaneOps → Project → Create Compose Stack → From ZaneOps Template**
+
+This opens a searchable list of all templates in this repository. Select one and ZaneOps will deploy it instantly.
+
+Alternatively, you can deploy manually:
+
 1. Choose a template from this repository
-2. Copy/Paste the `.yml` file contents to your ZaneOps instance
+2. Copy/Paste the `.yml` file contents into your ZaneOps instance
 3. ZaneOps will automatically:
    - Generate secure passwords and secrets
    - Assign domains to your services
