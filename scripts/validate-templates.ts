@@ -3,6 +3,7 @@ import { parse } from "yaml";
 import { z } from "zod";
 
 const TEMPLATES_DIR = resolve(import.meta.dirname, "../src/content/templates");
+const PROJECT_ROOT = resolve(import.meta.dirname, "..");
 
 const serviceSchema = z.looseObject({
   image: z.string({
@@ -24,17 +25,22 @@ const composeSchema = z.looseObject({
 
 type ComposeFile = z.infer<typeof composeSchema>;
 
-let hasErrors = false;
+const templateErrors = new Map<string, { path: string; messages: string[] }>();
 
-function error(template: string, message: string) {
-  console.error(`[${template}] ${message}`);
-  hasErrors = true;
+function error(template: string, composePath: string, message: string) {
+  const entry = templateErrors.get(template) ?? {
+    path: composePath,
+    messages: []
+  };
+  entry.messages.push(message);
+  templateErrors.set(template, entry);
 }
 
 const ROUTE_LABEL_RE = /^zane\.http\.routes\.(\d+)\.(.+)$/;
 
 function validateRouteLabels(
   templateName: string,
+  composePath: string,
   serviceName: string,
   labels: Record<string, unknown>
 ) {
@@ -58,6 +64,7 @@ function validateRouteLabels(
     if (indices[i] !== i) {
       error(
         templateName,
+        composePath,
         `service '${serviceName}': route indices must be sequential starting from 0 (found ${indices.join(", ")})`
       );
       break;
@@ -68,12 +75,14 @@ function validateRouteLabels(
     if (!route.domain) {
       error(
         templateName,
+        composePath,
         `service '${serviceName}': route ${index} is missing required 'domain'`
       );
     }
     if (!route.port) {
       error(
         templateName,
+        composePath,
         `service '${serviceName}': route ${index} is missing required 'port'`
       );
     } else if (
@@ -82,6 +91,7 @@ function validateRouteLabels(
     ) {
       error(
         templateName,
+        composePath,
         `service '${serviceName}': route ${index} has invalid port '${route.port}' (must be a valid integer)`
       );
     }
@@ -92,13 +102,18 @@ function validateRouteLabels(
     ) {
       error(
         templateName,
+        composePath,
         `service '${serviceName}': route ${index} has invalid strip_prefix '${route.strip_prefix}' (must be "true" or "false")`
       );
     }
   }
 }
 
-function validateCompose(templateName: string, compose: ComposeFile) {
+function validateCompose(
+  templateName: string,
+  composePath: string,
+  compose: ComposeFile
+) {
   for (const [serviceName, svc] of Object.entries(compose.services)) {
     // Bind volumes must use absolute source paths
     for (const vol of (svc.volumes as Array<unknown>) ?? []) {
@@ -111,6 +126,7 @@ function validateCompose(templateName: string, compose: ComposeFile) {
           if (source.startsWith(".")) {
             error(
               templateName,
+              composePath,
               `service '${serviceName}' has a bind volume with relative source path '${source}'. Only absolute paths are supported for bind mounts.`
             );
           }
@@ -120,6 +136,7 @@ function validateCompose(templateName: string, compose: ComposeFile) {
         if (v.type === "bind" && v.source != null && !isAbsolute(v.source)) {
           error(
             templateName,
+            composePath,
             `service '${serviceName}' has a bind volume with relative source path '${v.source}'. Only absolute paths are supported for bind mounts.`
           );
         }
@@ -132,6 +149,7 @@ function validateCompose(templateName: string, compose: ComposeFile) {
     if (labels && typeof labels === "object" && !Array.isArray(labels)) {
       validateRouteLabels(
         templateName,
+        composePath,
         serviceName,
         labels as Record<string, unknown>
       );
@@ -158,6 +176,7 @@ function validateCompose(templateName: string, compose: ComposeFile) {
         const sources = list.map((s) => `'${s}'`).join(" and ");
         error(
           templateName,
+          composePath,
           `service '${serviceName}' has two configs ${sources} pointing to the same target '${target}'.`
         );
       }
@@ -169,6 +188,7 @@ function validateCompose(templateName: string, compose: ComposeFile) {
     if (typeof config === "object" && config !== null && "file" in config) {
       error(
         templateName,
+        composePath,
         `configs.${configName}: Additional property 'file' is not allowed, please use 'content' instead.`
       );
     }
@@ -184,11 +204,12 @@ for await (const entry of new Bun.Glob("*").scan({
 }
 
 for (const name of templateDirs) {
-  const composePath = join(TEMPLATES_DIR, name, "compose.yml");
-  const composeFile = Bun.file(composePath);
+  const absolutePath = join(TEMPLATES_DIR, name, "compose.yml");
+  const relativePath = absolutePath.slice(PROJECT_ROOT.length + 1);
+  const composeFile = Bun.file(absolutePath);
 
   if (!(await composeFile.exists())) {
-    error(name, "missing compose.yml");
+    error(name, relativePath, "missing compose.yml");
     continue;
   }
 
@@ -196,25 +217,38 @@ for (const name of templateDirs) {
   try {
     parsed = parse(await composeFile.text());
   } catch (e) {
-    error(name, `invalid YAML: ${(e as Error).message}`);
+    error(name, relativePath, `invalid YAML: ${(e as Error).message}`);
     continue;
   }
 
   const result = composeSchema.safeParse(parsed);
   if (!result.success) {
     for (const issue of result.error.issues) {
-      const path = issue.path.length > 0 ? `${issue.path.join(".")}: ` : "";
-      error(name, `${path}${issue.message}`);
+      const issuePath =
+        issue.path.length > 0 ? `${issue.path.join(".")}: ` : "";
+      error(name, relativePath, `${issuePath}${issue.message}`);
     }
     continue;
   }
 
+  validateCompose(name, relativePath, result.data);
 
-  validateCompose(name, result.data);
+  if (!templateErrors.has(name)) {
+    console.log(`\x1b[32m✓\x1b[0m ${name}`);
+  }
 }
 
-if (hasErrors) {
+if (templateErrors.size > 0) {
+  const SEPARATOR = "─".repeat(60);
+  for (const [template, { path, messages }] of templateErrors) {
+    console.error(SEPARATOR);
+    console.error(`[${template}] ${path}`);
+    for (const msg of messages) {
+      console.error(`  • ${msg}`);
+    }
+  }
+  console.error(SEPARATOR);
   process.exit(1);
 }
 
-console.log(`Validated ${templateDirs.length} templates — all good.`);
+console.log(`\n\x1b[32m✓\x1b[0m All ${templateDirs.length} templates are valid.`);
