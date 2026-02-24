@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Wait for Typesense
+        run: |
+          for i in {1..20}; do
+            curl -sf http://127.0.0.1:8108/health && break
+            echo "Waiting for Typesense... ($i/20)"
+            sleep 2
+          done
+
       - name: Validate templates
         run: bun run validate
 
