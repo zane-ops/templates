@@ -1,0 +1,32 @@
+name: PR Build
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      typesense:
+        image: typesense/typesense:29.0
+        env:
+          TYPESENSE_API_KEY: typesense
+          TYPESENSE_DATA_DIR: /data
+        ports:
+          - 8108:8108
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+        env:
+          TYPESENSE_KEY: typesense
+          TYPESENSE_API_KEY: typesense
+          TYPESENSE_HOST: localhost
