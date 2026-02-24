@@ -57,30 +57,14 @@ export const GET: APIRoute = async ({ url }) => {
       .documents()
       .search(searchRequest);
 
-    return new Response(JSON.stringify(results), {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
+    return Response.json(results);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Search failed";
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+    return Response.json(
+      { error: message },
+      {
+        status: 500
       }
-    });
+    );
   }
-};
-
-export const OPTIONS: APIRoute = () => {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "*"
-    }
-  });
 };
