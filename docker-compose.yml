@@ -1,7 +1,7 @@
 x-zane-env:
   TYPESENSE_API_KEY: "{{ generate_password | 32 }}"
   TYPESENSE_ENABLE_CORS: "true"
-  TYPESENSE_DOMAIN: "{{ generate_domain }}"
+  MAIN_DOMAIN: "{{ generate_domain }}"
 
 version: "3.8"
 services:
@@ -14,10 +14,32 @@ services:
       - TYPESENSE_DATA_DIR=/data
     volumes:
       - typesense-data:/data
+
+  proxy:
+    image: caddy:2-alpine
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
     deploy:
       labels:
-        zane.http.routes.0.domain: ${TYPESENSE_DOMAIN}
-        zane.http.routes.0.port: 8108
+        zane.http.routes.0.domain: ${MAIN_DOMAIN}
+        zane.http.routes.0.port: 80
 
 volumes:
   typesense-data:
+configs:
+  caddyfile:
+    content: |
+      :{$PORT:80} {
+        reverse_proxy localhost:3000
+
+        header {
+          Access-Control-Allow-Origin *
+          Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+          Access-Control-Allow-Headers "Content-Type, Authorization, Accept"
+          Access-Control-Max-Age 86400
+        }
+
+        @options method OPTIONS
+        respond @options 204
+      }
