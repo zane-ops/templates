@@ -76,9 +76,10 @@ The collection is **dropped and recreated** on every seed to ensure schema chang
 ## Adding a Template
 
 1. Create a new directory under `src/content/templates/<slug>/`
-2. Add an `index.md` with the template frontmatter and Docker Compose content
-3. Add a logo to `public/logos/`
-4. Restart the dev server — the template will be seeded into Typesense automatically
+2. Add an `index.md` with the template frontmatter (name, slug, description, tags, logo, URLs)
+3. Add a `compose.yml` with the Docker Compose content
+4. Add a logo to `public/logos/`
+5. Restart the dev server — the template will be seeded into Typesense automatically
 
 ## What is ZaneOps?
 
