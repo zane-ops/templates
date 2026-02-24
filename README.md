@@ -191,18 +191,6 @@ For multiple routes, increment the index: `routes.0`, `routes.1`, `routes.2`.
    - Create necessary volumes
    - Start all services in the correct order
 
-## Contributing
-
-To add a new template:
-
-1. Create a `.yml` file following the existing structure
-2. Include all necessary services and dependencies
-3. Add health checks for all services
-4. Use ZaneOps templating for sensitive values
-5. Document any special configuration in comments
-6. Test the deployment on ZaneOps
-
-See the [Compose Template Guide](compose-template-guide.md) for detailed instructions and best practices.
 
 ## Support
 
