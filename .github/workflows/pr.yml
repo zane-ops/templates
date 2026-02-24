@@ -15,6 +15,7 @@ jobs:
           TYPESENSE_DATA_DIR: /data
         ports:
           - 8108:8108
+        options: --tmpfs /data
 
     steps:
       - uses: actions/checkout@v4
