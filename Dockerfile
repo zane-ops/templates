@@ -16,13 +16,13 @@ RUN FORCE_COLOR=true bun install --frozen-lockfile --prod
 FROM build-deps AS build
 COPY . .
 ARG ZANE_DOMAINS
-ARG TYPESENSE_KEY
+ARG TYPESENSE_API_KEY
 ARG TYPESENSE_HOST
 ARG SEED_TYPESENSE='true'
 ENV ZANE_DOMAINS=${ZANE_DOMAINS}
-ENV TYPESENSE_KEY=${TYPESENSE_KEY}
+ENV TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
 ENV TYPESENSE_HOST=${TYPESENSE_HOST}
-RUN --mount=type=cache,target=/app/.astro TYPESENSE_HOST=${TYPESENSE_HOST} TYPESENSE_KEY=${TYPESENSE_KEY} FORCE_COLOR=true bun --bun run build
+RUN --mount=type=cache,target=/app/.astro FORCE_COLOR=true bun --bun run build
 
 
 RUN bun install --frozen-lockfile

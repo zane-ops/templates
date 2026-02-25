@@ -6,23 +6,27 @@ This repository is an API backend — it exposes template data as JSON endpoints
 
 ## Table of Contents
 
-- [Adding a Template](#adding-a-template)
-- [Quick Start: Creating a Template](#quick-start-creating-a-template)
-  - [Minimal Template](#minimal-template)
-  - [Template with Variables](#template-with-variables)
-  - [Template Expressions](#template-expressions)
-  - [Routing Labels](#routing-labels)
-  - [Key Rules](#key-rules)
-  - [What ZaneOps Ignores](#what-zaneops-ignores)
-- [API Endpoints](#api-endpoints)
-- [Project Structure](#project-structure)
-- [Commands](#commands)
-- [Environment Variables](#environment-variables)
-- [How Seeding Works](#how-seeding-works)
-- [What is ZaneOps?](#what-is-zaneops)
-- [Usage](#usage)
-- [Support](#support)
-- [License](#license)
+- [ZaneOps Templates](#zaneops-templates)
+  - [Table of Contents](#table-of-contents)
+  - [Adding a Template](#adding-a-template)
+  - [Quick Start: Creating a Template](#quick-start-creating-a-template)
+    - [Minimal Template](#minimal-template)
+    - [Template with Variables](#template-with-variables)
+    - [Template Expressions](#template-expressions)
+    - [Routing Labels](#routing-labels)
+    - [Key Rules](#key-rules)
+    - [What ZaneOps Ignores](#what-zaneops-ignores)
+  - [API Endpoints](#api-endpoints)
+    - [`GET /api/search`](#get-apisearch)
+  - [Project Structure](#project-structure)
+  - [Commands](#commands)
+  - [Environment Variables](#environment-variables)
+  - [How Seeding Works](#how-seeding-works)
+  - [What is ZaneOps?](#what-is-zaneops)
+  - [Usage](#usage)
+    - [Deploying on ZaneOps](#deploying-on-zaneops)
+  - [Support](#support)
+  - [License](#license)
 
 ## Adding a Template
 
@@ -176,11 +180,11 @@ Built with [Astro](https://astro.build).
 
 ## Environment Variables
 
-| Variable         | Description                              |
-| :--------------- | :--------------------------------------- |
-| `TYPESENSE_HOST` | Typesense host (default: `localhost`)    |
-| `TYPESENSE_KEY`  | Typesense API key (default: `typesense`) |
-| `ZANE_DOMAINS`   | Comma-separated list of domains          |
+| Variable            | Description                              |
+| :------------------ | :--------------------------------------- |
+| `TYPESENSE_HOST`    | Typesense host (default: `localhost`)    |
+| `TYPESENSE_API_KEY` | Typesense API key (default: `typesense`) |
+| `ZANE_DOMAINS`      | Comma-separated list of domains          |
 
 ## How Seeding Works
 

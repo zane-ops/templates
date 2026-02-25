@@ -24,7 +24,7 @@ export default defineConfig({
   },
   env: {
     schema: {
-      TYPESENSE_KEY: envField.string({
+      TYPESENSE_API_KEY: envField.string({
         context: "server",
         access: "secret",
         optional: false

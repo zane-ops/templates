@@ -39,6 +39,5 @@ jobs:
       - name: Build
         run: bun run build
         env:
-          TYPESENSE_KEY: typesense
           TYPESENSE_API_KEY: typesense
           TYPESENSE_HOST: 127.0.0.1
