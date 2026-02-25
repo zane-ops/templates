@@ -10,6 +10,7 @@ const { default: seedTypesense } = await import(
 const defaultDomain =
   process.env.ZANE_DOMAINS?.split(",")[0] || "templates.zaneops.dev";
 const scheme = process.env.NODE_ENV === "production" ? "https" : "http";
+const shouldSeedTypeSense = (process.env.SEED_TYPESENSE ?? "true") === "true";
 
 // https://astro.build/config
 export default defineConfig({
@@ -35,7 +36,7 @@ export default defineConfig({
       })
     }
   },
-  integrations: [seedTypesense()],
+  integrations: shouldSeedTypeSense ? [seedTypesense()] : [],
   vite: {
     ssr: {
       noExternal: ["zod"]
