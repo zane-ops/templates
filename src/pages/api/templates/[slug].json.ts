@@ -1,5 +1,4 @@
 import { getCollection } from "astro:content";
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { APIRoute } from "astro";
 
@@ -15,7 +14,7 @@ type TemplateCollection = Awaited<
   ReturnType<typeof getCollection<"templates">>
 >;
 
-export const GET: APIRoute = ({ props }) => {
+export const GET: APIRoute = async ({ props }) => {
   const { entry } = props as { entry: TemplateCollection[number] };
 
   const ymlPath = resolve(
@@ -24,7 +23,7 @@ export const GET: APIRoute = ({ props }) => {
     entry.data.slug,
     "compose.yml"
   );
-  const compose = readFileSync(ymlPath, "utf-8");
+  const compose = await Bun.file(ymlPath).text();
 
   return Response.json({
     id: entry.data.slug,
