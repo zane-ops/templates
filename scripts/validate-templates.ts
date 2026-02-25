@@ -1,9 +1,11 @@
 import { isAbsolute, join, resolve } from "node:path";
+import matter from "gray-matter";
 import { parse } from "yaml";
 import { z } from "zod";
 
 const TEMPLATES_DIR = resolve(import.meta.dirname, "../src/content/templates");
 const PROJECT_ROOT = resolve(import.meta.dirname, "..");
+const PUBLIC_DIR = resolve(import.meta.dirname, "../public");
 
 const serviceSchema = z.looseObject({
   image: z.string({
@@ -36,7 +38,7 @@ function error(template: string, composePath: string, message: string) {
   templateErrors.set(template, entry);
 }
 
-const ROUTE_LABEL_RE = /^zane\.http\.routes\.(\d+)\.(.+)$/;
+const ROUTE_LABEL_REGEX = /^zane\.http\.routes\.(\d+)\.(.+)$/;
 
 function validateRouteLabels(
   templateName: string,
@@ -47,7 +49,7 @@ function validateRouteLabels(
   const routes = new Map<number, Record<string, string>>();
 
   for (const [key, value] of Object.entries(labels)) {
-    const match = key.match(ROUTE_LABEL_RE);
+    const match = key.match(ROUTE_LABEL_REGEX);
     if (!match) continue;
     const index = parseInt(match[1], 10);
     const prop = match[2];
@@ -233,6 +235,36 @@ for (const name of templateDirs) {
 
   validateCompose(name, relativePath, result.data);
 
+  // Validate that logoUrl in index.md exists in public/
+  const indexMdPath = join(TEMPLATES_DIR, name, "index.md");
+  const indexRelativePath = indexMdPath.slice(PROJECT_ROOT.length + 1);
+  const indexFile = Bun.file(indexMdPath);
+  if (await indexFile.exists()) {
+    const content = await indexFile.text();
+    let frontmatter: Record<string, unknown>;
+    try {
+      frontmatter = matter(content).data;
+    } catch (e) {
+      error(
+        name,
+        indexRelativePath,
+        `invalid frontmatter YAML: ${(e as Error).message}`
+      );
+      continue;
+    }
+    const logoUrl = frontmatter.logoUrl;
+    if (typeof logoUrl === "string") {
+      const logoFile = Bun.file(join(PUBLIC_DIR, logoUrl));
+      if (!(await logoFile.exists())) {
+        error(
+          name,
+          indexRelativePath,
+          `logoUrl '${logoUrl}' does not exist in public/`
+        );
+      }
+    }
+  }
+
   if (!templateErrors.has(name)) {
     console.log(`\x1b[32m✓\x1b[0m ${name}`);
   }
@@ -251,4 +283,6 @@ if (templateErrors.size > 0) {
   process.exit(1);
 }
 
-console.log(`\n\x1b[32m✓\x1b[0m All ${templateDirs.length} templates are valid.`);
+console.log(
+  `\n\x1b[32m✓\x1b[0m All ${templateDirs.length} templates are valid.`
+);
