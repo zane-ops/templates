@@ -2,3 +2,8 @@ services:
   typesense:
     ports:
       - 8108:8108
+
+  # No need to run proxy locally
+  proxy:
+    deploy:
+      replicas: 0

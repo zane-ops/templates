@@ -1,10 +1,9 @@
 x-zane-env:
   TYPESENSE_API_KEY: "{{ generate_password | 32 }}"
   TYPESENSE_ENABLE_CORS: "true"
-  MAIN_DOMAIN: templates.zaneops.dev
+  MAIN_DOMAIN: "{{ generate_domain }}"
   TEMPLATE_API_ALIAS: to-complete
 
-version: "3.8"
 services:
   typesense:
     image: typesense/typesense:29.0
@@ -32,6 +31,7 @@ configs:
   caddyfile:
     content: |
       :{$PORT:80} {
+        log
         reverse_proxy ${TEMPLATE_API_ALIAS}:3000
 
         header {
