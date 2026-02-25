@@ -62,7 +62,7 @@ configs:
       replica-read-only yes
 
       # Security
-      requirepass ${valkey_password}
+      requirepass ${VALKEY_PASSWORD}
 
       # Memory management
       maxmemory-policy noeviction
