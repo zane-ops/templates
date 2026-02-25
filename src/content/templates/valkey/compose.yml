@@ -1,7 +1,6 @@
 version: "3.8"
 x-zane-env:
-  valkey_password: "{{ generate_password | 32 }}"
-  VALKEY_PASSWORD: ${valkey_password}
+  VALKEY_PASSWORD: "{{ generate_password | 32 }}"
   DB_HOST_ENV_NAME: "{{ network_alias | 'valkey' }}"
   DB_HOST_GLOBAL_NAME: "{{ global_alias | 'valkey' }}"
   __VALKEY_URL: "redis://:${VALKEY_PASSWORD}@${DB_HOST_ENV_NAME}:6379"
