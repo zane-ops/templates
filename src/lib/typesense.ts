@@ -1,4 +1,4 @@
-import Typesense from "typesense";
+import Typesense, { type FieldType } from "typesense";
 
 export const typesenseClient = new Typesense.Client({
   nodes: [
@@ -14,13 +14,12 @@ export const typesenseClient = new Typesense.Client({
 
 export async function ensureCollection(
   name: string,
-  fields: Array<{ name: string; type: string; index?: boolean }>
+  fields: Array<{ name: string; type: FieldType; index?: boolean }>
 ): Promise<void> {
   try {
     await typesenseClient.collections(name).delete();
   } catch {
     // collection didn't exist, that's fine
   }
-  // biome-ignore lint/suspicious/noExplicitAny: Typesense types are strict
-  await typesenseClient.collections().create({ name, fields } as any);
+  await typesenseClient.collections().create({ name, fields });
 }

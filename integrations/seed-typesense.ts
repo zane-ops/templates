@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AstroIntegration } from "astro";
+import type { CollectionFieldSchema } from "typesense";
 import { ensureCollection, typesenseClient } from "../src/lib/typesense.js";
 
 const COLLECTION_NAME = "templates";
@@ -13,7 +14,7 @@ const fields = [
   { name: "tags", type: "string[]" },
   { name: "url", type: "string", index: false },
   { name: "logoUrl", type: "string", index: false, optional: true }
-];
+] satisfies CollectionFieldSchema[];
 
 async function seedFromDocs(docs: unknown[]) {
   await ensureCollection(COLLECTION_NAME, fields);
