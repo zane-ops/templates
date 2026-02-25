@@ -1,0 +1,19 @@
+name: Deploy
+on:
+    push:
+        branches: [main] # customize as needed
+jobs:
+    build-push-app:
+        name: Build and Deploy Template Stack
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Deploy stack to ZaneOps
+              run: |
+                  curl -f -o /dev/null -X PUT "${{ secrets.DOCKER_COMPOSE_DEPLOY_WEBHOOK_URL }}" \
+                      -H "Content-Type: application/json" \
+                      -d "{
+                            \"commit_message\": \"${{ github.event.head_commit.message }}\",
+                            \"user_content\": $(cat docker-compose.yml | jq -Rs .)
+                      }"
