@@ -1,0 +1,16 @@
+version: "3.8"
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - type: volume
+        target: /etc/nginx
+        source: nginx-config
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.port: 80
+volumes:
+  nginx-config: {}
