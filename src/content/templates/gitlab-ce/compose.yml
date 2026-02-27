@@ -4,10 +4,11 @@ x-zane-env:
   POSTGRES_DB: gitlab
   POSTGRES_USER: gitlab
   POSTGRES_PASSWORD: "{{ generate_password | 32 }}"
+  IMAGE_VERSION: latest
 
 services:
   gitlab:
-    image: gitlab/gitlab-ce:latest
+    image: gitlab/gitlab-ce:${IMAGE_VERSION:-latest}
     hostname: gitlab.example.com
     environment:
       GITLAB_OMNIBUS_CONFIG: |
@@ -46,6 +47,12 @@ services:
       - type: volume
         target: /var/opt/gitlab
         source: gitlab_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/-/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
     depends_on:
       - postgresql
       - redis
@@ -60,6 +67,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - type: volume
         target: /var/lib/postgresql/data
@@ -67,6 +80,12 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - type: volume
         target: /data

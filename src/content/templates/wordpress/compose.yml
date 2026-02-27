@@ -6,10 +6,11 @@ x-zane-env:
   MYSQL_ROOT_PASSWORD: "{{ generate_password | 32 }}"
   WP_DOMAIN: "{{ generate_domain }}"
   WORDPRESS_DEBUG: 0
+  IMAGE_VERSION: latest
 
 services:
   wordpress:
-    image: wordpress:latest
+    image: wordpress:${IMAGE_VERSION:-latest}
     environment:
       WORDPRESS_DB_HOST: ${MYSQL_HOST}
       WORDPRESS_DB_USER: ${MYSQL_USER}
