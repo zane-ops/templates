@@ -1,5 +1,6 @@
 ---
 name: nginx
+slug: nginx
 logoUrl: /logos/nginx.png
 githubUrl: https://github.com/nginx/nginx
 docsUrl: https://nginx.org/en/docs/
