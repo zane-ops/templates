@@ -1,0 +1,65 @@
+x-zane-env:
+  MYSQL_USER: wordpress
+  MYSQL_HOST: mysql
+  MYSQL_DATABASE: wordpress
+  MYSQL_PASSWORD: "{{ generate_password | 32 }}"
+  MYSQL_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+  WP_DOMAIN: "{{ generate_domain }}"
+  WORDPRESS_DEBUG: 0
+
+services:
+  wordpress:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: ${MYSQL_HOST}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-0}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '256M');
+        define('DISALLOW_FILE_EDIT', true);
+    volumes:
+      - wp_content:/var/www/html
+    configs:
+      - source: uploads.ini
+        target: /usr/local/etc/php/conf.d/uploads.ini
+    depends_on:
+      - mysql
+    deploy:
+      labels:
+        zane.http.routes.0.domain: "${WP_DOMAIN}"
+        zane.http.routes.0.port: 80
+
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exit | mysql -h localhost -P 3306 -u ${MYSQL_USER} -p$$MYSQL_PASSWORD",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  wp_content:
+  mysql_data:
+
+configs:
+  uploads.ini:
+    content: |
+      upload_max_filesize = 64M
+      post_max_size = 64M
+      memory_limit = 256M
+      max_execution_time = 300
+      max_input_vars = 3000
