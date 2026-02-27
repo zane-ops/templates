@@ -1,4 +1,7 @@
-# IMPORTANT: Please update the admin credentials in your .env file
+# =========================#
+#         IMPORTANT        #
+# =========================#
+# Please update the admin credentials in your .env file
 # Access PocketBase Admin UI at: https://your-domain.com/_/ (replace with your configured domain)
 # Note: Admin UI may take up to 1 minute to load on first startup
 version: "3.8"

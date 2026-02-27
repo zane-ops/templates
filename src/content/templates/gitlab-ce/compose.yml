@@ -1,3 +1,10 @@
+# =========================#
+#         IMPORTANT        #
+# =========================#
+# The initial user login is `root` with a random generated password
+# you can see in by connecting to your `gitlab` service and running
+# cat /etc/gitlab/initial_root_password
+# More info in the docs https://docs.gitlab.com/install/next_steps/#initial-sign-in
 x-zane-env:
   GITLAB_DOMAIN: "{{ generate_domain }}"
   GITLAB_HOST: "https://${GITLAB_DOMAIN}" # or http://${GITLAB_DOMAIN}
