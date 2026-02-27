@@ -19,6 +19,9 @@ Usage:
     python scripts/apply_dokploy_data.py [--dry-run]
                                          [--overwrite-description]
                                          [--overwrite-tags]
+                                         [template]
+
+    template  Optional slug to apply data for only one template.
 """
 
 import argparse
@@ -79,7 +82,12 @@ def merge_tags(existing: list[str], incoming: list[str]) -> list[str]:
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 
-def main(dry_run: bool, overwrite_description: bool, overwrite_tags: bool) -> None:
+def main(
+    dry_run: bool,
+    overwrite_description: bool,
+    overwrite_tags: bool,
+    only_template: str | None = None,
+) -> None:
     C = Colors
 
     if not MATCHES_FILE.exists():
@@ -92,10 +100,27 @@ def main(dry_run: bool, overwrite_description: bool, overwrite_tags: bool) -> No
 
     import json
 
-    matches: dict[str, dict] = json.loads(MATCHES_FILE.read_text())
-    print(
-        f"{C.BLUE}Applying Dokploy data to{C.ENDC} {len(matches)} matched templates …\n"
-    )
+    all_matches: dict[str, dict] = json.loads(MATCHES_FILE.read_text())
+
+    if only_template is not None:
+        if only_template not in all_matches:
+            print(
+                f"{C.RED}Error:{C.ENDC} Template {C.YELLOW}{only_template!r}{C.ENDC}"
+                f" not found in {MATCHES_FILE.relative_to(REPO_ROOT)}. "
+                "Run fetch_dokploy_data.py first (optionally with the same slug).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        matches = {only_template: all_matches[only_template]}
+        print(
+            f"{C.BLUE}Applying Dokploy data to single template:{C.ENDC}"
+            f" {C.YELLOW}{only_template}{C.ENDC}\n"
+        )
+    else:
+        matches = all_matches
+        print(
+            f"{C.BLUE}Applying Dokploy data to{C.ENDC} {len(matches)} matched templates …\n"
+        )
 
     updated = 0
     skipped = 0
@@ -191,6 +216,12 @@ def main(dry_run: bool, overwrite_description: bool, overwrite_tags: bool) -> No
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "template",
+        nargs="?",
+        default=None,
+        help="Optional template slug to apply data for only one template.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print what would change without writing any files.",
@@ -215,4 +246,5 @@ if __name__ == "__main__":
         dry_run=args.dry_run,
         overwrite_description=args.overwrite_description,
         overwrite_tags=args.overwrite_tags,
+        only_template=args.template,
     )

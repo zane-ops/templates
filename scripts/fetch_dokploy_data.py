@@ -11,7 +11,10 @@ The match results are saved to scripts/dokploy-matches.json for use by
 apply_dokploy_data.py which updates the template frontmatter.
 
 Usage:
-    python scripts/fetch_dokploy_data.py [--dry-run]
+    python scripts/fetch_dokploy_data.py [--dry-run] [template]
+
+    template  Optional slug to process only one template (upserts into existing
+              matches file rather than replacing it).
 """
 
 import argparse
@@ -121,7 +124,7 @@ def download_logo(
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 
-def main(dry_run: bool) -> None:
+def main(dry_run: bool, only_template: str | None = None) -> None:
     C = Colors
     session = requests.Session()
     session.headers["User-Agent"] = "zaneops-template-fetcher/1.0"
@@ -141,8 +144,24 @@ def main(dry_run: bool) -> None:
         )
 
     by_id, by_norm = build_lookup(index)
-    local_slugs = get_local_slugs()
-    print(f"\n{C.BLUE}Processing {len(local_slugs)} local templates …{C.ENDC}\n")
+    all_local_slugs = get_local_slugs()
+
+    if only_template is not None:
+        if only_template not in all_local_slugs:
+            print(
+                f"\n{C.RED}Error:{C.ENDC} Template {C.YELLOW}{only_template!r}{C.ENDC}"
+                f" not found in {TEMPLATES_DIR.relative_to(REPO_ROOT)}.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        local_slugs = [only_template]
+        print(
+            f"\n{C.BLUE}Processing single template:{C.ENDC}"
+            f" {C.YELLOW}{only_template}{C.ENDC}\n"
+        )
+    else:
+        local_slugs = all_local_slugs
+        print(f"\n{C.BLUE}Processing {len(local_slugs)} local templates …{C.ENDC}\n")
 
     matched: dict[str, dict] = {}
     unmatched: list[str] = []
@@ -200,6 +219,11 @@ def main(dry_run: bool) -> None:
 
     # 2. Save match results
     if not dry_run:
+        if only_template is not None and MATCHES_FILE.exists():
+            # Upsert: preserve existing entries for other templates
+            existing: dict[str, dict] = json.loads(MATCHES_FILE.read_text())
+            existing.update(matched)
+            matched = existing
         MATCHES_FILE.write_text(json.dumps(matched, indent=2))
         print(
             f"\n{C.GREEN}Saved matches{C.ENDC}"
@@ -223,6 +247,12 @@ def main(dry_run: bool) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "template",
+        nargs="?",
+        default=None,
+        help="Optional template slug to process only one template.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print what would happen without writing any files.",
@@ -233,7 +263,7 @@ if __name__ == "__main__":
         print(f"{Colors.YELLOW}[DRY RUN]{Colors.ENDC} No files will be written.\n")
 
     try:
-        main(dry_run=args.dry_run)
+        main(dry_run=args.dry_run, only_template=args.template)
     except requests.RequestException as exc:
         print(f"\n{Colors.RED}Network error:{Colors.ENDC} {exc}", file=sys.stderr)
         sys.exit(1)
