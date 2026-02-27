@@ -1,0 +1,25 @@
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+  CLICKHOUSE_USER: default
+  CLICKHOUSE_PASSWORD: "{{ generate_password | 32 }}"
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    volumes:
+      - type: volume
+        target: /var/lib/clickhouse
+        source: clickhouse-data
+      - type: volume
+        target: /var/log/clickhouse-server
+        source: clickhouse-logs
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.port: 8123
+volumes:
+  clickhouse-data:
+  clickhouse-logs:
