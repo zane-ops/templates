@@ -1,0 +1,20 @@
+version: "3.8"
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+  IMAGE_VERSION: 2.1.0
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:{IMAGE_VERSION:-latest}
+    volumes:
+      - type: volume
+        target: /app/data
+        source: uptime-kuma-data
+      - type: bind
+        target: /var/run/docker.sock
+        source: /var/run/docker.sock
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.port: 3001
+volumes:
+  uptime-kuma-data:
