@@ -1,6 +1,6 @@
 x-zane-env:
   main_domain: "{{ generate_domain }}"
-  BASE_URL: http://${main_domain}
+  BASE_URL: https://${main_domain} # or http://${main_domain} if you deploy locally
   SECRET_KEY_BASE: "{{ generate_base64 | 64 }}"
   TOTP_VAULT_KEY: "{{ generate_base64 | 32 }}"
   IMAGE_VERSION: v2.1.5
