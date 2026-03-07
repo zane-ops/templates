@@ -1,0 +1,20 @@
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+  MASTERPASS: "{{ generate_base64 | 16 }}"
+services:
+  drizzle-gateway:
+    image: ghcr.io/drizzle-team/gateway:latest
+    environment:
+      PORT: "4983"
+      STORE_PATH: /app
+      MASTERPASS: ${MASTERPASS}
+    volumes:
+      - type: volume
+        target: /app
+        source: drizzle-gateway
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.port: 4983
+volumes:
+  drizzle-gateway:
