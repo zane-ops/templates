@@ -4,7 +4,7 @@ x-zane-env:
   IMAGE_VERSION: 2.1.0
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:{IMAGE_VERSION:-latest}
+    image: louislam/uptime-kuma:${IMAGE_VERSION:-latest}
     volumes:
       - type: volume
         target: /app/data
