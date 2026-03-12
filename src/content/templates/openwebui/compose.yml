@@ -26,7 +26,8 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       ENABLE_SIGNUP: ${ENABLE_SIGNUP}
-      OLLAMA_BASE_URL: http://ollama:11434
+      # Uncomment if you uncomment ollama
+      # OLLAMA_BASE_URL: http://ollama:11434
       WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY}
     deploy:
       labels:
@@ -42,18 +43,23 @@ services:
       retries: 3
       start_period: 30s
 
-  ollama:
-    image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
-    volumes:
-      - ollama:/root/.ollama
-    # For GPU you need to either install Nvidia or AMD GPU: https://hub.docker.com/r/ollama/ollama#nvidia-gpu
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+# -----------------------------------------------------------------------------------
+# Optional: Ollama Service
+# To enable local AI model hosting with Ollama, uncomment the following service.
+#  ollama:
+#    image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
+#    volumes:
+#      - ollama:/root/.ollama
+#     # --------------------------------------------------------------------------
+#     # Optional: GPU Support (Uncomment the following lines to enable)
+#     # deploy:
+#     #   resources:
+#     #     reservations:
+#     #       devices:
+#     #         - driver: nvidia
+#     #           count: 1
+#     #           capabilities: [gpu]
+#     # --------------------------------------------------------------------------
 
 volumes:
   open-webui:

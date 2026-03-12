@@ -1,5 +1,5 @@
 ---
-name: Open WebUI (+ollama)
+name: Open WebUI
 slug: openwebui
 description: User-friendly AI Interface (Supports Ollama, OpenAI API, ...)
 logoUrl: /logos/openwebui.png

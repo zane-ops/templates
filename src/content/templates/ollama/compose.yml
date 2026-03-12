@@ -5,13 +5,16 @@ services:
     image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
     volumes:
       - ollama:/root/.ollama
-    # For GPU you need to either install Nvidia or AMD GPU: https://hub.docker.com/r/ollama/ollama#nvidia-gpu
+    # --------------------------------------------------------------------------
+    # Optional: GPU Support (Uncomment the following lines to enable)
     # deploy:
     #   resources:
     #     reservations:
     #       devices:
     #         - driver: nvidia
-    #           count: all
+    #           count: 1
     #           capabilities: [gpu]
+    # --------------------------------------------------------------------------
+
 volumes:
   ollama:
