@@ -1,5 +1,5 @@
 ---
-title: OpenClaw
+name: OpenClaw
 slug: openclaw
 logoUrl: /logos/openclaw.jpeg
 githubUrl: https://github.com/openclaw/openclaw
@@ -12,7 +12,6 @@ tags:
 - messaging
 - chatbot
 - gateway
-- self-hosted
 - automation
 - moltbot
 ---
