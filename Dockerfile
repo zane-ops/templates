@@ -22,7 +22,7 @@ ARG SEED_TYPESENSE='true'
 ENV ZANE_DOMAINS=${ZANE_DOMAINS}
 ENV TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
 ENV TYPESENSE_HOST=${TYPESENSE_HOST}
-RUN --mount=type=cache,target=/app/.astro FORCE_COLOR=true bun --bun run build
+RUN --mount=type=cache,target=/app/.astro FORCE_COLOR=true bun --bun run validate && bun --bun run build
 
 
 RUN bun install --frozen-lockfile
