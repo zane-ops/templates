@@ -1,0 +1,17 @@
+x-zane-env:
+  OLLAMA_IMAGE_VERSION: latest
+services:
+  ollama:
+    image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
+    volumes:
+      - ollama:/root/.ollama
+    # For GPU you need to either install Nvidia or AMD GPU: https://hub.docker.com/r/ollama/ollama#nvidia-gpu
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+volumes:
+  ollama:

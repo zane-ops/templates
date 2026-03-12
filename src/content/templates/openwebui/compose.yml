@@ -1,15 +1,61 @@
 x-zane-env:
   owebui_domain: "{{ generate_domain }}"
-  OWEBUI_IMAGE: ghcr.io/open-webui/open-webui:main-slim # Or `ghcr.io/open-webui/open-webui:main`
+  WEBUI_SECRET_KEY: "{{ generate_base64 | 32 }}"
+  WEBUI_IMAGE: ghcr.io/open-webui/open-webui:main-slim # Or `ghcr.io/open-webui/open-webui:main`
+  OLLAMA_IMAGE_VERSION: latest
+  POSTGRES_USER: openwebui
+  POSTGRES_PASSWORD: "{{ generate_password | 32 }}"
+  POSTGRES_DB: openwebui
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  ENABLE_SIGNUP: "true"
 
 services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - open-webui-pgdata:/var/lib/postgresql
+
   openwebui:
-    image: ${OWEBUI_IMAGE:-ghcr.io/open-webui/open-webui:main-slim}
+    image: ${WEBUI_IMAGE:-ghcr.io/open-webui/open-webui:main-slim}
     volumes:
       - open-webui:/app/backend/data
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      ENABLE_SIGNUP: ${ENABLE_SIGNUP}
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY}
     deploy:
       labels:
         zane.http.routes.0.port: 8080
         zane.http.routes.0.domain: ${owebui_domain}
+    depends_on:
+      - postgres
+      - ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  ollama:
+    image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
+    volumes:
+      - ollama:/root/.ollama
+    # For GPU you need to either install Nvidia or AMD GPU: https://hub.docker.com/r/ollama/ollama#nvidia-gpu
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
 volumes:
   open-webui:
+  open-webui-pgdata:
+  ollama:
