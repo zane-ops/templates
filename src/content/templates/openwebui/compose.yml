@@ -1,0 +1,15 @@
+x-zane-env:
+  owebui_domain: "{{ generate_domain }}"
+  OWEBUI_IMAGE: ghcr.io/open-webui/open-webui:main-slim # Or `ghcr.io/open-webui/open-webui:main`
+
+services:
+  openwebui:
+    image: ${OWEBUI_IMAGE:-ghcr.io/open-webui/open-webui:main-slim}
+    volumes:
+      - open-webui:/app/backend/data
+    deploy:
+      labels:
+        zane.http.routes.0.port: 8080
+        zane.http.routes.0.domain: ${owebui_domain}
+volumes:
+  open-webui:
