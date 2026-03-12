@@ -1,0 +1,118 @@
+# =========================#
+#         IMPORTANT        #
+# =========================#
+# connect to the openclaw-gateway terminal and run this command
+# to get a token:
+#
+# openclaw dashboard --no-open
+#
+# Then use the token to auth to the dashboard https://<your-domain>/#token=7ae2dee43f8cfd6ffcd8f8caedbcf038
+#
+# Use this command to add a new agent/model:
+#
+# openclaw agents add
+#
+x-zane-env:
+  OPENCLAW_IMAGE: ghcr.io/openclaw/openclaw:main-slim
+  openclaw_domain: "{{ generate_domain }}"
+  OPENCLAW_GATEWAY_TOKEN: "{{ generate_password | 32 }}"
+
+services:
+  openclaw-init:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:main-slim}
+    user: "0" # root
+    volumes:
+      - openclaw-config-dir:/home/node/.openclaw
+      - openclaw-workspace-dir:/home/node/.openclaw/workspace
+    command:
+      [
+        "chown",
+        "-R",
+        "node:node",
+        "/home/node/.openclaw",
+        "/home/node/.openclaw/workspace",
+      ]
+    deploy:
+      mode: replicated-job
+      restart_policy:
+        condition: none
+  openclaw-gateway:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:main-slim}
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: ${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      OPENCLAW_GATEWAY_URL: ws://0.0.0.0:18789
+      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/config.json
+    configs:
+      - source: config.json
+        target: /home/node/.openclaw/config.json
+    depends_on:
+      - openclaw-init
+    volumes:
+      - openclaw-config-dir:/home/node/.openclaw
+      - openclaw-workspace-dir:/home/node/.openclaw/workspace
+      ## Uncomment the lines below to enable sandbox isolation
+      ## (agents.defaults.sandbox). Requires Docker CLI in the image
+      ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
+      ## docker-setup.sh with OPENCLAW_SANDBOX=1 for automated setup.
+      ## Set DOCKER_GID to the host's docker group GID (run: stat -c '%g' /var/run/docker.sock).
+      # - /var/run/docker.sock:/var/run/docker.sock
+    # group_add:
+    #   - "${DOCKER_GID:-999}"
+    # ports:
+    #   - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+    #   - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+    deploy:
+      labels:
+        zane.http.routes.0.port: 18789
+        zane.http.routes.0.domain: ${openclaw_domain}
+    init: true
+    restart: unless-stopped
+    command:
+      [
+        "node",
+        "dist/index.js",
+        "gateway",
+        "--bind",
+        "${OPENCLAW_GATEWAY_BIND:-lan}",
+        "--port",
+        "18789",
+        "--allow-unconfigured",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  openclaw-config-dir:
+  openclaw-workspace-dir:
+
+configs:
+  # modify this config file to include
+  config.json:
+    content: |
+      {
+       "gateway": {
+         "controlUi": {
+           "allowInsecureAuth": false,
+           "dangerouslyDisableDeviceAuth": false,
+           "allowedOrigins": [
+             "https://${openclaw_domain}", "http://0.0.0.0:18789"
+            ]
+          }
+        }
+      }
