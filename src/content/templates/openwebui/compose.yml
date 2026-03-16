@@ -46,10 +46,10 @@ services:
 # -----------------------------------------------------------------------------------
 # Optional: Ollama Service
 # To enable local AI model hosting with Ollama, uncomment the following service.
-#  ollama:
-#    image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
-#    volumes:
-#      - ollama:/root/.ollama
+#   ollama:
+#     image: ollama/ollama:${OLLAMA_IMAGE_VERSION:-latest}
+#     volumes:
+#       - ollama:/root/.ollama
 #     # --------------------------------------------------------------------------
 #     # Optional: GPU Support (Uncomment the following lines to enable)
 #     # deploy:
