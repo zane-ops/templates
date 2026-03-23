@@ -10,4 +10,5 @@ description: Uptime Kuma is a free and open source monitoring tool that allows y
 tags:
 - monitoring
 - healthcheck
+- status
 ---
