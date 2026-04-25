@@ -263,6 +263,23 @@ for (const name of templateDirs) {
         );
       }
     }
+
+    const frontmatterUrlSchema = z.object({
+      docsUrl: z.url(),
+      websiteUrl: z.url(),
+      githubUrl: z.url()
+    });
+    const urlResult = frontmatterUrlSchema.safeParse(frontmatter);
+    if (!urlResult.success) {
+      for (const issue of urlResult.error.issues) {
+        const field = issue.path.join(".");
+        error(
+          name,
+          indexRelativePath,
+          `frontmatter ${field}: ${issue.message}`
+        );
+      }
+    }
   }
 
   if (!templateErrors.has(name)) {
