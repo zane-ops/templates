@@ -1,0 +1,198 @@
+x-zane-env:
+  main_domain: "{{ generate_domain }}"
+  # MinIO needs to be reachable from the browser (uploads & playback use presigned URLs)
+  s3_domain: "{{ generate_domain }}"
+
+  # public URL of the server, eg. https://cap.so
+  WEB_URL: https://${main_domain}
+  S3_PUBLIC_URL: https://${s3_domain}
+
+  # secrets, must stay stable across deployments
+  # 32 byte hex string for encrypting values like AWS access keys
+  DATABASE_ENCRYPTION_KEY: "{{ generate_password | 64 }}"
+  NEXTAUTH_SECRET: "{{ generate_password | 64 }}"
+  # secret for authenticating media server webhook callbacks
+  MEDIA_SERVER_WEBHOOK_SECRET: "{{ generate_password | 64 }}"
+
+  # MySQL database
+  MYSQL_DATABASE: cap
+  MYSQL_USER: cap
+  MYSQL_PASSWORD: "{{ generate_password | 32 }}"
+  MYSQL_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+
+  # object storage
+  # although they are prefixed with `CAP_AWS`, these don't have to be for AWS,
+  # and can instead be for any S3-compatible service
+  MINIO_ROOT_USER: "{{ generate_username }}"
+  MINIO_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+  CAP_AWS_BUCKET: cap
+  CAP_AWS_REGION: us-east-1
+
+  # instance settings
+  # comma-separated list of permitted signup domains, eg. `acme.com,acme.dev`
+  # leave empty to let anyone who can reach the login page create an account
+  CAP_ALLOWED_SIGNUP_DOMAINS: ""
+  # should videos be public or private by default
+  CAP_VIDEOS_DEFAULT_PUBLIC: "false" # or 'true'
+
+  # Cap uses Resend for email sending, including sending login code emails
+  RESEND_API_KEY: ""
+  RESEND_FROM_DOMAIN: ""
+
+  # provide these to allow Google/Apple login
+  GOOGLE_CLIENT_ID: ""
+  GOOGLE_CLIENT_SECRET: ""
+  APPLE_CLIENT_ID: ""
+  APPLE_CLIENT_SECRET: ""
+
+  # optional: AI features, each key unlocks a distinct feature.
+  # uncomment here *and* in the `cap-web` service below to enable.
+  # ASSEMBLY_API_KEY: ""     # audio transcription (captions)
+  # OPENAI_API_KEY: ""       # AI summaries
+  # GROQ_API_KEY: ""         # AI summaries
+  # ANTHROPIC_API_KEY: ""    # AI chat
+  # REPLICATE_API_TOKEN: ""  # audio enhancement
+
+  # optional: Chrome Web Store extension id allowed to receive auth keys
+  # CAP_CHROME_EXTENSION_ID: ""
+
+  # optional: provide these to use WorkOS for enterprise SSO
+  # WORKOS_CLIENT_ID: ""
+  # WORKOS_API_KEY: ""
+
+services:
+  cap-web:
+    image: ghcr.io/capsoftware/cap-web:latest
+    depends_on:
+      - mysql
+      - minio
+      - minio-setup
+      - media-server
+    environment:
+      # MySQL database URL
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      WEB_URL: ${WEB_URL}
+      # should be the same as WEB_URL
+      NEXTAUTH_URL: ${WEB_URL}
+      DATABASE_ENCRYPTION_KEY: ${DATABASE_ENCRYPTION_KEY}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      MEDIA_SERVER_WEBHOOK_SECRET: ${MEDIA_SERVER_WEBHOOK_SECRET}
+      CAP_AWS_ACCESS_KEY: ${MINIO_ROOT_USER}
+      CAP_AWS_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      CAP_AWS_BUCKET: ${CAP_AWS_BUCKET}
+      CAP_AWS_REGION: ${CAP_AWS_REGION}
+      # public endpoint for accessing S3
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_URL}
+      # internal endpoint for accessing S3, keeps traffic on the local network
+      S3_INTERNAL_ENDPOINT: http://minio:9000
+      # access the bucket using path-style URLs (`/{bucket}/{key}`), as MinIO expects
+      S3_PATH_STYLE: "true"
+      CAP_ALLOWED_SIGNUP_DOMAINS: ${CAP_ALLOWED_SIGNUP_DOMAINS}
+      CAP_VIDEOS_DEFAULT_PUBLIC: ${CAP_VIDEOS_DEFAULT_PUBLIC}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_DOMAIN: ${RESEND_FROM_DOMAIN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET}
+      # ASSEMBLY_API_KEY: ${ASSEMBLY_API_KEY}
+      # OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # GROQ_API_KEY: ${GROQ_API_KEY}
+      # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      # REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
+      # CAP_CHROME_EXTENSION_ID: ${CAP_CHROME_EXTENSION_ID}
+      # WORKOS_CLIENT_ID: ${WORKOS_CLIENT_ID}
+      # WORKOS_API_KEY: ${WORKOS_API_KEY}
+      # URL of the media server for FFmpeg processing
+      MEDIA_SERVER_URL: http://media-server:3456
+      # base URL for media server webhooks
+      MEDIA_SERVER_WEBHOOK_URL: http://cap-web:3000
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.base_path: /
+        zane.http.routes.0.port: 3000
+
+  media-server:
+    image: ghcr.io/capsoftware/cap-media-server:latest
+    environment:
+      PORT: 3456
+      MEDIA_SERVER_WEBHOOK_SECRET: ${MEDIA_SERVER_WEBHOOK_SECRET}
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    command:
+      - --max_connections=1000
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - cap-mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "${MYSQL_USER}",
+          "-p${MYSQL_PASSWORD}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_SERVER_URL: ${S3_PUBLIC_URL}
+    volumes:
+      - cap-minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${s3_domain}
+        zane.http.routes.0.base_path: /
+        zane.http.routes.0.port: 9000
+
+  # one-shot job: creates the bucket used by Cap
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set capminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}; do sleep 2; done;
+      mc mb capminio/${CAP_AWS_BUCKET} --ignore-existing;
+      exit 0;
+      "
+    deploy:
+      mode: replicated-job
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  cap-mysql-data:
+  cap-minio-data:
