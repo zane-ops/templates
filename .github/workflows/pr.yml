@@ -37,7 +37,7 @@ jobs:
         run: bun run validate
 
       - name: Build
-        run: bun run build
+        run: bun run --bun build
         env:
           TYPESENSE_API_KEY: typesense
           TYPESENSE_HOST: 127.0.0.1
