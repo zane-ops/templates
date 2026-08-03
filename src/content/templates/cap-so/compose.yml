@@ -1,82 +1,93 @@
 x-zane-env:
-  VAR_NAME: "{{ template_expression }}"
+  main_domain: "{{ generate_domain }}"
+  # MinIO needs to be reachable from the browser (uploads & playback use presigned URLs)
+  s3_domain: "{{ generate_domain }}"
+
+  WEB_URL: https://${main_domain}
+  S3_PUBLIC_URL: https://${s3_domain}
+
+  # secrets, must stay stable across deployments
+  DATABASE_ENCRYPTION_KEY: "{{ generate_password | 64 }}"
+  NEXTAUTH_SECRET: "{{ generate_password | 64 }}"
+  MEDIA_SERVER_WEBHOOK_SECRET: "{{ generate_password | 64 }}"
+
+  # database
+  MYSQL_DATABASE: cap
+  MYSQL_USER: cap
+  MYSQL_PASSWORD: "{{ generate_password | 32 }}"
+  MYSQL_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+
+  # object storage
+  MINIO_ROOT_USER: "{{ generate_username }}"
+  MINIO_ROOT_PASSWORD: "{{ generate_password | 32 }}"
+  CAP_AWS_BUCKET: cap
+  CAP_AWS_REGION: us-east-1
+
+  # optional: transactional emails (required for magic-link login)
+  RESEND_API_KEY: ""
+  RESEND_FROM_DOMAIN: ""
+
+  # optional: OAuth providers
+  GOOGLE_CLIENT_ID: ""
+  GOOGLE_CLIENT_SECRET: ""
+  APPLE_CLIENT_ID: ""
+  APPLE_CLIENT_SECRET: ""
 
 services:
   cap-web:
-    container_name: cap-web
     image: ghcr.io/capsoftware/cap-web:latest
-    restart: unless-stopped
     depends_on:
-      mysql:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
+      - mysql
+      - minio
+      - minio-setup
+      - media-server
     environment:
-      DATABASE_URL: mysql://cap:${MYSQL_PASSWORD:-cap-local-pwd-123}@mysql:3306/cap
-      WEB_URL: ${CAP_URL:-http://localhost:3000}
-      NEXTAUTH_URL: ${CAP_URL:-http://localhost:3000}
-      DATABASE_ENCRYPTION_KEY: ${DATABASE_ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789}
-      MEDIA_SERVER_WEBHOOK_SECRET: ${MEDIA_SERVER_WEBHOOK_SECRET:-fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210}
-      CAP_AWS_ACCESS_KEY: ${MINIO_ROOT_USER:-cap-admin}
-      CAP_AWS_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-cap-minio-pwd-456}
-      CAP_AWS_BUCKET: cap
-      CAP_AWS_REGION: us-east-1
-      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_URL:-http://localhost:9000}
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      WEB_URL: ${WEB_URL}
+      NEXTAUTH_URL: ${WEB_URL}
+      DATABASE_ENCRYPTION_KEY: ${DATABASE_ENCRYPTION_KEY}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      MEDIA_SERVER_WEBHOOK_SECRET: ${MEDIA_SERVER_WEBHOOK_SECRET}
+      CAP_AWS_ACCESS_KEY: ${MINIO_ROOT_USER}
+      CAP_AWS_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      CAP_AWS_BUCKET: ${CAP_AWS_BUCKET}
+      CAP_AWS_REGION: ${CAP_AWS_REGION}
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_URL}
       S3_INTERNAL_ENDPOINT: http://minio:9000
       S3_PATH_STYLE: "true"
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      RESEND_FROM_DOMAIN: ${RESEND_FROM_DOMAIN:-}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
-      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_DOMAIN: ${RESEND_FROM_DOMAIN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET}
       MEDIA_SERVER_URL: http://media-server:3456
       MEDIA_SERVER_WEBHOOK_URL: http://cap-web:3000
-    ports:
-      - "${CAP_PORT:-3000}:3000"
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    networks:
-      - cap-network
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${main_domain}
+        zane.http.routes.0.base_path: /
+        zane.http.routes.0.port: 3000
 
   media-server:
-    container_name: cap-media-server
-    build:
-      context: ./apps/media-server
-      dockerfile: Dockerfile.standalone
-    restart: unless-stopped
+    image: ghcr.io/capsoftware/cap-media-server:latest
     environment:
       PORT: 3456
-      MEDIA_SERVER_WEBHOOK_SECRET: ${MEDIA_SERVER_WEBHOOK_SECRET:-fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210}
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "bun",
-          "-e",
-          "fetch('http://127.0.0.1:3456/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - cap-network
+      MEDIA_SERVER_WEBHOOK_SECRET: ${MEDIA_SERVER_WEBHOOK_SECRET}
 
   mysql:
-    container_name: cap-mysql
     image: mysql:8.0
-    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: cap
-      MYSQL_USER: cap
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cap-local-pwd-123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-cap-root-pwd-789}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     command:
       - --max_connections=1000
       - --default-authentication-plugin=mysql_native_password
@@ -93,27 +104,21 @@ services:
           "-h",
           "localhost",
           "-u",
-          "cap",
-          "-p${MYSQL_PASSWORD:-cap-local-pwd-123}",
+          "${MYSQL_USER}",
+          "-p${MYSQL_PASSWORD}",
         ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
-    networks:
-      - cap-network
 
   minio:
-    container_name: cap-minio
     image: minio/minio:latest
-    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-cap-admin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-cap-minio-pwd-456}
-    ports:
-      - "${MINIO_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_SERVER_URL: ${S3_PUBLIC_URL}
     volumes:
       - cap-minio-data:/data
     healthcheck:
@@ -122,26 +127,27 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - cap-network
+    deploy:
+      labels:
+        zane.http.routes.0.domain: ${s3_domain}
+        zane.http.routes.0.base_path: /
+        zane.http.routes.0.port: 9000
 
+  # one-shot job: creates the bucket used by Cap
   minio-setup:
-    container_name: cap-minio-setup
     image: minio/mc:latest
     depends_on:
-      minio:
-        condition: service_healthy
+      - minio
     entrypoint: >
       /bin/sh -c "
-      mc alias set capminio http://minio:9000 $${MINIO_ROOT_USER:-cap-admin} $${MINIO_ROOT_PASSWORD:-cap-minio-pwd-456};
-      mc mb capminio/cap --ignore-existing;
+      until mc alias set capminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}; do sleep 2; done;
+      mc mb capminio/${CAP_AWS_BUCKET} --ignore-existing;
       exit 0;
       "
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-cap-admin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-cap-minio-pwd-456}
-    networks:
-      - cap-network
+    deploy:
+      mode: replicated-job
+      restart_policy:
+        condition: on-failure
 
 volumes:
   cap-mysql-data:
